@@ -9,6 +9,7 @@ require "sampfuncs"
 local inicfg = require "inicfg"
 local se = require "lib.samp.events"
 local effil_res, effil = pcall(require, 'effil')
+local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.lua"
 local update_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.txt"
 
