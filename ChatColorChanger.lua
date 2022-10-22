@@ -1,14 +1,15 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.5
-local script_version_text = '1.5'
+local script_version = 1.6
+local script_version_text = '1.6'
 
 require "moonloader"
 require "sampfuncs"
 local inicfg = require "inicfg"
 local se = require "lib.samp.events"
-local effil_res, effil = pcall(require, 'effil')
+local https = require 'ssl.https'
+local dlstatus = require('moonloader').download_status
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.lua"
 local update_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.txt"
@@ -83,10 +84,8 @@ inicfg.save(mainIni, directIni)
 
 function main()
     while not isSampAvailable() do wait(1000) end
-    if effil_res then
-        update_script(false, false)
-    end
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}/ccHelp", -1)
+    update_script(false)
     sampRegisterChatCommand("ccHelp", cmd_help)
     sampRegisterChatCommand("cc", cmd_toggle)
     sampRegisterChatCommand("togcc", cmd_togchatcolor)
@@ -973,76 +972,31 @@ function cmd_toggle()
 	end
 end
 
-function update_script(noupdatecheck, noerrorcheck)
-	asyncHttpRequest('GET', update_url, nil,
-		function(response)
-			if response.text ~= nil then
-				update_version = response.text:match("version: (.+)")
-				if update_version ~= nil then
-					if tonumber(update_version) > script_version then
-						local dlstatus = require('moonloader').download_status
-						sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} New version found! The update is in progress..", script.this.name), -1)
-						downloadUrlToFile(script_url, script_path, function(id, status)
-							if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-								sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} Download complete, reloading the script..", script.this.name), -1)
-                                lua_thread.create(function()
-                                    wait(500)    
-                                end)
-								thisScript():reload()
-							end
+function update_script(noupdatecheck)
+	local update_text = https.request(update_url)
+	if update_text ~= nil then
+		update_version = update_text:match("version: (.+)")
+		if update_version ~= nil then
+			if tonumber(update_version) > script_version then
+				sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} New version found! The update is in progress..", script.this.name), -1)
+				downloadUrlToFile(script_url, script_path, function(id, status)
+					if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+						sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
+						lua_thread.create(function()
+							wait(500) 
+							thisScript():reload()
 						end)
-					else
-						if noupdatecheck then
-							sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} No new version found..", script.this.name), -1)
-						end
 					end
+				end)
+			else
+				if noupdatecheck then
+					sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} No new version found..", script.this.name), -1)
 				end
 			end
-		end,
-		function(err)
-			if noerrorcheck then
-				sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} %s", script.this.name, err), -1)
-			end
 		end
-	)
+	end
 end
 
-function asyncHttpRequest(method, url, args, resolve, reject)
-    local request_thread = effil.thread(function (method, url, args)
-       local requests = require 'requests'
-       local result, response = pcall(requests.request, method, url, args)
-       if result then
-          response.json, response.xml = nil, nil
-          return true, response
-       else
-          return false, response
-       end
-    end)(method, url, args)
-    if not resolve then resolve = function() end end
-    if not reject then reject = function() end end
-    lua_thread.create(function()
-       local runner = request_thread
-       while true do
-          local status, err = runner:status()
-          if not err then
-             if status == 'completed' then
-                local result, response = runner:get()
-                if result then
-                   resolve(response)
-                else
-                   reject(response)
-                end
-                return
-             elseif status == 'canceled' then
-                return reject(status)
-             end
-          else
-             return reject(err)
-          end
-          wait(0)
-       end
-    end)
- end
 
 tColors = {
     [0] = "{911600}",
