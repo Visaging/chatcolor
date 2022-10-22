@@ -984,7 +984,9 @@ function update_script(noupdatecheck, noerrorcheck)
 						downloadUrlToFile(script_url, script_path, function(id, status)
 							if status == dlstatus.STATUS_ENDDOWNLOADDATA then
 								sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} Download complete, reloading the script..", script.this.name), -1)
-								wait(500) 
+                                lua_thread.create(function()
+                                    wait(500)    
+                                end)
 								thisScript():reload()
 							end
 						end)
