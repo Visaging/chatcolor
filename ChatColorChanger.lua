@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.4
-local script_version_text = '1.4'
+local script_version = 1.5
+local script_version_text = '1.5'
 
 require "moonloader"
 require "sampfuncs"
