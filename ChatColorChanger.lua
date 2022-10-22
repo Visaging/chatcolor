@@ -81,10 +81,10 @@ local mainIni = inicfg.load(nil, directIni)
 inicfg.save(mainIni, directIni)
 
 function main()
-    while not isSampAvailable() do
-        wait(1000)
+    while not isSampAvailable() do wait(1000) end
+    if effil_res then
+        update_script(false, false)
     end
-    update_script(false, false)
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}/ccHelp", -1)
     sampRegisterChatCommand("ccHelp", cmd_help)
     sampRegisterChatCommand("cc", cmd_toggle)
