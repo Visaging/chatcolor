@@ -8,8 +8,8 @@ require "moonloader"
 require "sampfuncs"
 local inicfg = require "inicfg"
 local se = require "lib.samp.events"
-local script_url = "https://raw.githubusercontent.com/akacross/libraries/main/libraries.lua"
-local update_url = "https://raw.githubusercontent.com/akacross/libraries/main/libraries.txt"
+local script_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.lua"
+local update_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.txt"
 
 dir = getWorkingDirectory() .. "\\config\\Visage's revamped Config\\"
 dir2 = getWorkingDirectory() .. "\\config\\"
@@ -83,6 +83,7 @@ function main()
     while not isSampAvailable() do
         wait(1000)
     end
+    update_script(false, false)
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}/ccHelp", -1)
     sampRegisterChatCommand("ccHelp", cmd_help)
     sampRegisterChatCommand("cc", cmd_toggle)
@@ -1082,5 +1083,5 @@ tColors = {
     [39] = "{5c4c45}",
     [40] = "{373534}",
     [41] = "{000000}",
-    [42] = "{d8d8d8}",
+    [42] = "{d8d8d8}"
 }
