@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.7
-local script_version_text = '1.7'
+local script_version = 1.71
+local script_version_text = '1.71'
 
 require "moonloader"
 require "sampfuncs"
@@ -978,10 +978,10 @@ function update_script(noupdatecheck)
 		update_version = update_text:match("version: (.+)")
 		if update_version ~= nil then
 			if tonumber(update_version) > script_version then
-				sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} New version found! The update is in progress..", script.this.name), -1)
+				sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! The update is in progress.", script.this.name), -1)
 				downloadUrlToFile(script_url, script_path, function(id, status)
 					if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-						sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
+						sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
 						lua_thread.create(function()
 							wait(500) 
 							thisScript():reload()
@@ -990,7 +990,7 @@ function update_script(noupdatecheck)
 				end)
 			else
 				if noupdatecheck then
-					sampAddChatMessage(string.format("{ABB2B9}[%s]{FFFFFF} No new version found..", script.this.name), -1)
+					sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} No new version found.", script.this.name), -1)
 				end
 			end
 		end
