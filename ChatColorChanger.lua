@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.71
-local script_version_text = '1.71'
+local script_version = 1.72
+local script_version_text = '1.72'
 
 require "moonloader"
 require "sampfuncs"
@@ -543,6 +543,7 @@ function cmd_help()
 	sampAddChatMessage("{FFFFFF}              ---> {7700FF}Chat Color {FFFFFF}<---", -1)
 	sampAddChatMessage(statuscc.."{FFFFFF}/cc{FFFF00} - {00FF00}Enables {FFFFFF}/ {FF0000}Disables{FFFF00} chat color.", -1)
 	sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/togcc [Name]{FFFF00} - Toggle specific chat color.", -1)
+    sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/ccupdate{FFFF00} - Updates the script to the latest version.", -1)
     sampAddChatMessage("======= {7700FF}General Chats {FFFFFF}=======", -1)
 	sampAddChatMessage(statuscc.."{FFFFFF}/setgc{FFFF00} - Sets custom global chat color.", -1)
 	sampAddChatMessage(statuspr.."{FFFFFF}/setpr{FFFF00} - Sets custom portable radio chat color.", -1)
