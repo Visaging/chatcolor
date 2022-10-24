@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.73
-local script_version_text = '1.73'
+local script_version = 1.74
+local script_version_text = '1.74'
 
 require "moonloader"
 require "sampfuncs"
@@ -91,6 +91,11 @@ function main()
     sampRegisterChatCommand("togcc", cmd_togchatcolor)
     sampRegisterChatCommand("freqhider", freqhider)
     sampRegisterChatCommand("ccupdate", update_script)
+    sampRegisterChatCommand("ccversion", function()
+		lua_thread.create(function()
+            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Current version: {00b7ff}[%s]{FFFFFF}. Use {00b7ff}[/ccupdate]{FFFFFF} to check for updates.", script.this.name, script_version_text), -1)
+		end)
+	end)
     sampRegisterChatCommand(
         "SetGC",
         function(clr)
@@ -997,7 +1002,6 @@ function update_script(noupdatecheck)
 		end
 	end
 end
-
 
 tColors = {
     [0] = "{911600}",
