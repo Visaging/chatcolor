@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.72
-local script_version_text = '1.72'
+local script_version = 1.73
+local script_version_text = '1.73'
 
 require "moonloader"
 require "sampfuncs"
@@ -617,7 +617,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == 869072810 and mainIni.main.togcccom) then
-            if msg:match("** .+Admin") or msg:match("*** .+Helper") or msg:match("*** Former Admin") or msg:match("** Helper Manager") then
+            if msg:match("** .+Admin") or msg:match("*** .+Helper") or msg:match("*** Former Admin") or msg:match("** Helper Manager") or msg:match("** Management") or msg:match("** Asst. Management") or msg:match("** Assistant Management") then
                 return {string.format("0x%sFF", tColors[mainIni.main.com]:gsub("[{}]", "")), msg}
             end
         end
