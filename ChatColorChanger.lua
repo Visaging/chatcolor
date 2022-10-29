@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.74
-local script_version_text = '1.74'
+local script_version = 1.75
+local script_version_text = '1.75'
 
 require "moonloader"
 require "sampfuncs"
@@ -69,6 +69,14 @@ if not doesFileExist(config) then
                     a3 = 42,
                     a2 = 42,
                     a1 = 42]]
+                    --[[CHAT TOGGLES]]
+                    togdpd = false,
+                    togdfbi = false,
+                    togdares = false,
+                    togdfmd = false,
+                    togdall = false,
+                    togfacrad = false,
+
                 }
             },
             directIni
@@ -214,12 +222,8 @@ function main()
             DialogAdminChat()
         end
     )]]
-    sampRegisterChatCommand(
-        "Setfacd",
-        function(clr)
-            DialogFacD()
-        end
-    )
+    sampRegisterChatCommand("Setfacd", DialogFacD)
+    sampRegisterChatCommand("chattog", DialogCTog)
     while true do
         wait(0)
         local resultglobal, button, list, input = sampHasDialogRespond(5481)
@@ -475,6 +479,40 @@ function main()
                 DialogFacD()
             end
         end
+        local resultctog, button, list, input = sampHasDialogRespond(5503)
+        if resultctog then
+            if button == 1 then
+                if list == 0 then
+                    Dialogtogd()
+                elseif list == 1 then
+                    mainIni.main.togfacrad = not mainIni.main.togfacrad
+                    DialogCTog()
+                end
+            end
+        end
+        local resultctogd, button, list, input = sampHasDialogRespond(5504)
+        if resultctogd then
+            if button == 1 then
+                if list == 0 then
+                    mainIni.main.togdpd = not mainIni.main.togdpd
+                    Dialogtogd()
+                elseif list == 1 then
+                    mainIni.main.togdares = not mainIni.main.togdares
+                    Dialogtogd()
+                elseif list == 2 then
+                    mainIni.main.togdfbi = not mainIni.main.togdfbi
+                    Dialogtogd()
+                elseif list == 3 then
+                    mainIni.main.togdfmd = not mainIni.main.togdfmd
+                    Dialogtogd()
+                elseif list == 4 then
+                    mainIni.main.togdall = not mainIni.main.togdall
+                    Dialogtogd()
+                end
+            elseif button == 0 then
+                DialogCTog()
+            end
+        end
     end
 end
 
@@ -548,6 +586,7 @@ function cmd_help()
 	sampAddChatMessage("{FFFFFF}              ---> {7700FF}Chat Color {FFFFFF}<---", -1)
 	sampAddChatMessage(statuscc.."{FFFFFF}/cc{FFFF00} - {00FF00}Enables {FFFFFF}/ {FF0000}Disables{FFFF00} chat color.", -1)
 	sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/togcc [Name]{FFFF00} - Toggle specific chat color.", -1)
+    sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/chattog {FFFF00} - Toggle specific chats.", -1)
     sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/ccupdate{FFFF00} - Updates the script to the latest version.", -1)
     sampAddChatMessage("======= {7700FF}General Chats {FFFFFF}=======", -1)
 	sampAddChatMessage(statuscc.."{FFFFFF}/setgc{FFFF00} - Sets custom global chat color.", -1)
@@ -580,6 +619,24 @@ function se.onServerMessage(clr, msg)
         end
     end
     if mainIni.main.toggle then
+        if (clr == -2686902) then
+            if msg:match("** LSPD") and mainIni.main.togdpd then
+                return false
+            elseif msg:match("** ARES") and mainIni.main.togdares then
+                return false
+            elseif msg:match("** FBI") and mainIni.main.togdfbi then
+                return false
+            elseif msg:match("** LSFMD") and mainIni.main.togdfmd then
+                return false
+            elseif msg:match("** .**") and mainIni.main.togdall then
+                return false
+            end
+        end
+        if (clr == -1920073729 and mainIni.main.togfacrad) then
+            if msg:match("** .**") then
+                return false
+            end
+        end
         if (clr == -5963606 and mainIni.main.togccg) then
             if msg:match("%(%( .*") then
                 return {string.format("0x%sFF", tColors[mainIni.main.global]:gsub("[{}]", "")), msg}
@@ -829,6 +886,61 @@ function Dialogdcommon()
 		examples = examples..v..k..' '
 	end
 	sampShowDialog(5502, "{ffffff}Common Department Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dcommon]..mainIni.main.dcommon..'\n\n'..tColors[mainIni.main.dcommon].."Use your brain please", "Select", "Back", 1)
+end
+
+function DialogCTog()
+	local examples = ''
+	for k, v in pairs(tColors) do
+		examples = examples..v..k..' '
+	end
+
+    if mainIni.main.togfacrad then
+        togfacradst = "{00FF00}Enabled"
+    else
+        togfacradst = "{FF0000}Disabled"
+    end
+    sampShowDialog(5503, "Chat Toggler", 'Chats\tStatus\n\
+{ffffff}Department Radio (d)\tOptions\n\
+{ffffff}Faction Radio (r)\t'..togfacradst, "Toggle", "Close", DIALOG_STYLE_TABLIST_HEADERS);
+end
+
+function Dialogtogd()
+	local examples = ''
+	for k, v in pairs(tColors) do
+		examples = examples..v..k..' '
+	end
+
+    if mainIni.main.togdpd then
+        togdpdst = "{00FF00}Enabled"
+    else
+        togdpdst = "{FF0000}Disabled"
+    end
+    if mainIni.main.togdfbi then
+        togdfbist = "{00FF00}Enabled"
+    else
+        togdfbist = "{FF0000}Disabled"
+    end
+    if mainIni.main.togdares then
+        togdaresst = "{00FF00}Enabled"
+    else
+        togdaresst = "{FF0000}Disabled"
+    end
+    if mainIni.main.togdfmd then
+        togdfmdst = "{00FF00}Enabled"
+    else
+        togdfmdst = "{FF0000}Disabled"
+    end
+    if mainIni.main.togdall then
+        togdallst = "{00FF00}Enabled"
+    else
+        togdallst = "{FF0000}Disabled"
+    end
+    sampShowDialog(5504, "Department (d) Chat Toggler", 'Department\tStatus\n\
+{001aff}LSPD\t'..togdpdst..'\n\
+{1c6486}ARES\t'..togdaresst..'\n\
+{7789ff}FBI\t'..togdfbist..'\n\
+{ffb3fc}LSFMD\t'..togdfmdst..'\n\
+{ffffff}Toggle All Departments\t'..togdallst, "Toggle", "Back", DIALOG_STYLE_TABLIST_HEADERS);
 end
 
 function cmd_togchatcolor(args)
