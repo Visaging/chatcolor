@@ -1,8 +1,9 @@
 script_name("Chat Color Changer")
 script_author("Arafat#0502, Visage#6468")
 
-local script_version = 1.75
-local script_version_text = '1.75'
+local script_version = 1.76
+local script_version_text = '1.76'
+local ttlcolors = 42
 
 require "moonloader"
 require "sampfuncs"
@@ -45,6 +46,8 @@ if not doesFileExist(config) then
                     togccf = false,
                     togcchc = false,
                     dcommons = false,
+                    togccnews = false,
+                    togccdc = false,
                     --[[ COLORS ]]
                     freqhider = 1,
                     global = 1,
@@ -60,6 +63,8 @@ if not doesFileExist(config) then
                     dfmd = 1,
                     dfbi = 1,
                     dcommon = 1,
+                    news = 1,
+                    dc = 1,
                     --[[ ADMIN CHAT (Removed)
                     togccadminc = true,
                     a7 = 42,
@@ -107,7 +112,7 @@ function main()
     sampRegisterChatCommand(
         "SetGC",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.global = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -123,7 +128,7 @@ function main()
     sampRegisterChatCommand(
         "Setnewbie",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.newbie = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -139,7 +144,7 @@ function main()
     sampRegisterChatCommand(
         "Setpr",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.pradio = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -155,7 +160,7 @@ function main()
     sampRegisterChatCommand(
         "Setfacr",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.facradio = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -171,7 +176,7 @@ function main()
     sampRegisterChatCommand(
         "Setf",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.family = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -187,7 +192,7 @@ function main()
     sampRegisterChatCommand(
         "Sethc",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.hc = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -203,7 +208,7 @@ function main()
     sampRegisterChatCommand(
         "Setc",
         function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= 42 then
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
                 mainIni.main.com = tonumber(clr)
                 if inicfg.save(mainIni, directIni) then
                     sampAddChatMessage(
@@ -216,12 +221,39 @@ function main()
             end
         end
     )
-    --[[sampRegisterChatCommand(
-        "Setadminc",
+    sampRegisterChatCommand(
+        "Setnews",
         function(clr)
-            DialogAdminChat()
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
+                mainIni.main.news = tonumber(clr)
+                if inicfg.save(mainIni, directIni) then
+                    sampAddChatMessage(
+                        "Your news chat color has successfully been set to " .. tColors[mainIni.main.news] .. clr,
+                        string.format("0x%s", tColors[mainIni.main.news]:gsub("[{}]", ""))
+                    )
+                end
+            else
+                DialogNewsC()
+            end
         end
-    )]]
+    )
+    sampRegisterChatCommand(
+        "Setdc",
+        function(clr)
+            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
+                mainIni.main.dc = tonumber(clr)
+                if inicfg.save(mainIni, directIni) then
+                    sampAddChatMessage(
+                        "Your donator chat color has successfully been set to " .. tColors[mainIni.main.dc] .. clr,
+                        string.format("0x%s", tColors[mainIni.main.dc]:gsub("[{}]", ""))
+                    )
+                end
+            else
+                DialogDcC()
+            end
+        end
+    )
+    --sampRegisterChatCommand("Setadminc", DialogAdminChat)
     sampRegisterChatCommand("Setfacd", DialogFacD)
     sampRegisterChatCommand("chattog", DialogCTog)
     while true do
@@ -229,7 +261,7 @@ function main()
         local resultglobal, button, list, input = sampHasDialogRespond(5481)
         if resultglobal then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.global = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -239,7 +271,7 @@ function main()
         local resultnewbie, button, list, input = sampHasDialogRespond(5482)
         if resultnewbie then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.newbie = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -249,7 +281,7 @@ function main()
         local resultpradio, button, list, input = sampHasDialogRespond(5483)
         if resultpradio then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.pradio = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -259,7 +291,7 @@ function main()
         local resultfacradio, button, list, input = sampHasDialogRespond(5485)
         if resultfacradio then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.facradio = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -269,7 +301,7 @@ function main()
         local resultcom, button, list, input = sampHasDialogRespond(5486)
         if resultcom then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.com = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -279,7 +311,7 @@ function main()
         local resultfamily, button, list, input = sampHasDialogRespond(5487)
         if resultfamily then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.family = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -289,7 +321,7 @@ function main()
         local resulthc, button, list, input = sampHasDialogRespond(5488)
         if resulthc then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.hc = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -319,7 +351,7 @@ function main()
         local resulta7, button, list, input = sampHasDialogRespond(5490)
         if resulta7 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a7 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -331,7 +363,7 @@ function main()
         local resulta6, button, list, input = sampHasDialogRespond(5491)
         if resulta6 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a6 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -343,7 +375,7 @@ function main()
         local resulta5, button, list, input = sampHasDialogRespond(5492)
         if resulta5 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a5 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -355,7 +387,7 @@ function main()
         local resulta4, button, list, input = sampHasDialogRespond(5493)
         if resulta4 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a4 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -367,7 +399,7 @@ function main()
         local resulta3, button, list, input = sampHasDialogRespond(5494)
         if resulta3 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a3 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -379,7 +411,7 @@ function main()
         local resulta2, button, list, input = sampHasDialogRespond(5495)
         if resulta2 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a2 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -391,7 +423,7 @@ function main()
         local resulta1, button, list, input = sampHasDialogRespond(5496)
         if resulta1 then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.a1 = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -422,7 +454,7 @@ function main()
         local resultdlspd, button, list, input = sampHasDialogRespond(5498)
         if resultdlspd then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.dlspd = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -434,7 +466,7 @@ function main()
         local resultdares, button, list, input = sampHasDialogRespond(5499)
         if resultdares then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.dares = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -446,7 +478,7 @@ function main()
         local resultdfbi, button, list, input = sampHasDialogRespond(5500)
         if resultdfbi then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.dfbi = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -458,7 +490,7 @@ function main()
         local resultdfmd, button, list, input = sampHasDialogRespond(5501)
         if resultdfmd then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.dfmd = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -470,7 +502,7 @@ function main()
         local resultdcommon, button, list, input = sampHasDialogRespond(5502)
         if resultdcommon then
             if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= 42 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
                     mainIni.main.dcommon = tonumber(input)
                     inicfg.save(mainIni, directIni)
                 end
@@ -513,6 +545,26 @@ function main()
                 DialogCTog()
             end
         end
+        local resultnews, button, list, input = sampHasDialogRespond(5505)
+        if resultnews then
+            if button == 1 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
+                    mainIni.main.news = tonumber(input)
+                    inicfg.save(mainIni, directIni)
+                end
+                DialogNewsC()
+            end
+        end
+        local resultdc, button, list, input = sampHasDialogRespond(5506)
+        if resultdc then
+            if button == 1 then
+                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
+                    mainIni.main.dc = tonumber(input)
+                    inicfg.save(mainIni, directIni)
+                end
+                DialogDcC()
+            end
+        end
     end
 end
 
@@ -526,7 +578,7 @@ function cmd_help()
     if (mainIni.main.togccg) then
         statusgca = "{00FF00}[Enabled] "
     else
-        statusgc = "{FF0000}[Disabled] "
+        statusgca = "{FF0000}[Disabled] "
     end
 
     if (mainIni.main.togccpr) then
@@ -577,6 +629,18 @@ function cmd_help()
         statusn = "{FF0000}[Disabled] "
     end
 
+    if (mainIni.main.togccnews) then
+        statusnews = "{00FF00}[Enabled] "
+    else
+        statusnews = "{FF0000}[Disabled] "
+    end
+
+    if (mainIni.main.togccdc) then
+        statusdc = "{00FF00}[Enabled] "
+    else
+        statusdc = "{FF0000}[Disabled] "
+    end
+
     --[[if (mainIni.main.togccadminc) then
         statusac = "{00FF00}[Enabled] "
     else
@@ -589,12 +653,14 @@ function cmd_help()
     sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/chattog {FFFF00} - Toggle specific chats.", -1)
     sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/ccupdate{FFFF00} - Updates the script to the latest version.", -1)
     sampAddChatMessage("======= {7700FF}General Chats {FFFFFF}=======", -1)
-	sampAddChatMessage(statuscc.."{FFFFFF}/setgc{FFFF00} - Sets custom global chat color.", -1)
+	sampAddChatMessage(statusgca.."{FFFFFF}/setgc{FFFF00} - Sets custom global chat color.", -1)
+    sampAddChatMessage(statusdc.."{FFFFFF}/setdc{FFFF00} - Sets custom donator chat color.", -1)
 	sampAddChatMessage(statuspr.."{FFFFFF}/setpr{FFFF00} - Sets custom portable radio chat color.", -1)
     sampAddChatMessage(statusfh.."{FFFFFF}/freqhider{FFFF00} - hides portable radio frequency.", -1)
 	sampAddChatMessage("======= {7700FF}Faction Chats {FFFFFF}=======", -1)
     sampAddChatMessage(statusr.."{FFFFFF}/setfacr{FFFF00} - Sets custom faction radio chat color.", -1)
     sampAddChatMessage(statusd.."{FFFFFF}/setfacd{FFFF00} - Sets custom faction department radio chat color or separate color for each department.", -1)
+    sampAddChatMessage(statusnews.."{FFFFFF}/setnews{FFFF00} - Sets custom news chat color.", -1)
     sampAddChatMessage("======= {7700FF}Family/Gang Chats {FFFFFF}=======", -1)
     sampAddChatMessage(statusf.."{FFFFFF}/setf{FFFF00} - Sets custom family chat color.", -1)
     sampAddChatMessage("======= {7700FF}Staff Chats {FFFFFF}=======", -1)
@@ -691,6 +757,16 @@ function se.onServerMessage(clr, msg)
         if (clr == -1511456854 and mainIni.main.togcchc) then
             if msg:match("*** .*") then
                 return {string.format("0x%sFF", tColors[mainIni.main.hc]:gsub("[{}]", "")), msg}
+            end
+        end
+        if (clr == -1697828182 and mainIni.main.togccnews) then
+            if msg:match("NR .+*") or msg:match("Live News Reporter .+*") or msg:match("Live Interview Guest .+*") then
+                return {string.format("0x%sFF", tColors[mainIni.main.news]:gsub("[{}]", "")), msg}
+            end
+        end
+        if (clr == -1210979584 and mainIni.main.togccdc) then
+            if msg:match("%(%( .*") then
+                return {string.format("0x%sFF", tColors[mainIni.main.dc]:gsub("[{}]", "")), msg}
             end
         end
     end
@@ -885,7 +961,7 @@ function Dialogdcommon()
 	for k, v in pairs(tColors) do
 		examples = examples..v..k..' '
 	end
-	sampShowDialog(5502, "{ffffff}Common Department Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dcommon]..mainIni.main.dcommon..'\n\n'..tColors[mainIni.main.dcommon].."Use your brain please", "Select", "Back", 1)
+	sampShowDialog(5502, "{ffffff}Common Department Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dcommon]..mainIni.main.dcommon..'\n\n'..tColors[mainIni.main.dcommon].."Use your brain please.", "Select", "Back", 1)
 end
 
 function DialogCTog()
@@ -943,11 +1019,27 @@ function Dialogtogd()
 {ffffff}Toggle All Departments\t'..togdallst, "Toggle", "Back", DIALOG_STYLE_TABLIST_HEADERS);
 end
 
+function DialogNewsC()
+	local examples = ''
+	for k, v in pairs(tColors) do
+		examples = examples..v..k..' '
+	end
+	sampShowDialog(5505, "{ffffff}News Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.news]..mainIni.main.news..'\n\n'..tColors[mainIni.main.news].."NR Memphis Wise: Few lottery tickets are still left.", "Select", "Close", 1)
+end
+
+function DialogDcC()
+	local examples = ''
+	for k, v in pairs(tColors) do
+		examples = examples..v..k..' '
+	end
+	sampShowDialog(5506, "{ffffff}Donator (dc) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dc]..mainIni.main.dc..'\n\n'..tColors[mainIni.main.dc].."(( Diamond Donator Kenny Dawn: Hi, I have no life. ))", "Select", "Close", 1)
+end
+
 function cmd_togchatcolor(args)
 	args = string.lower(args)
 	if #args == 0 then
 		sampAddChatMessage("{FF0000}Invalid Usage: {FFFFFF}/togcc [Name]")
-		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc", -1)
+		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc, News, Dc", -1)
 	elseif (args == "global") then
 		if mainIni.main.togccg then
 			mainIni.main.togccg = false
@@ -1056,9 +1148,33 @@ function cmd_togchatcolor(args)
 				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Admin Chat Color.", -1)
 			end
 		end]]
+    elseif (args == "news") then			
+		if mainIni.main.togccnews then
+			mainIni.main.togccnews = false
+			if inicfg.save(mainIni, directIni) then
+				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}News Chat Color.", -1)
+			end
+		else
+			mainIni.main.togccnews = true
+			if inicfg.save(mainIni, directIni) then
+				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}News Chat Color.", -1)
+			end
+		end
+    elseif (args == "dc") then			
+		if mainIni.main.togccdc then
+			mainIni.main.togccdc = false
+			if inicfg.save(mainIni, directIni) then
+				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Donator Chat Color.", -1)
+			end
+		else
+			mainIni.main.togccdc = true
+			if inicfg.save(mainIni, directIni) then
+				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Donator Chat Color.", -1)
+			end
+		end
 	else
 		sampAddChatMessage("{FF0000}Invalid Usage: {FFFFFF}/togcc [Name]")
-		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc", -1)
+		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc, News, Dc", -1)
 	end
 end
 
