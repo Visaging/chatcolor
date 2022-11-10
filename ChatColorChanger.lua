@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.79
-local script_version_text = '1.79'
+local script_version = 1.80
+local script_version_text = '1.80'
 
 require "moonloader"
 require "sampfuncs"
@@ -304,7 +304,7 @@ function se.onServerMessage(clr, msg)
         end
         if (clr == -2686902 and mainIni.main.dcommons and mainIni.main.togccd) then
             if msg:match("** .**") then
-                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dradio[3] * 255, presettings.dradio[0] * 255, presettings.dradio[1] * 255, presettings.dradio[2] * 255)), 3, 8)), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dcommon[3] * 255, presettings.dcommon[0] * 255, presettings.dcommon[1] * 255, presettings.dcommon[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == 869072810 and mainIni.main.togcccom) then
