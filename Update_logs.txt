@@ -1,4 +1,16 @@
-Version 1.79
-Huge Update!
+Version 1.79 - Huge Update!
 1. Whole script has been updated to imgui.
 2. Custom colors can now be added.
+
+Version 1.78
+1. News chat and donator chat has been added.
+2. Minor bug fixes.
+
+Version 1.77
+1. Minor bug fix for community chat.
+
+Version 1.76
+1. Major bug fixes for community and helper chat.
+
+Version 1.75
+1. One click updation has been added.
