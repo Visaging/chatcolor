@@ -1,4 +1,4 @@
-Version 1.79
+"Version 1.79
 Huge Update!
 1. Whole script has been updated to imgui.
-2. Custom colors can now be added.
+2. Custom colors can now be added."
