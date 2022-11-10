@@ -1,3 +1,6 @@
+Version 1.80
+1. Minor bug fixes.
+
 Version 1.79 - Huge Update!
 1. Whole script has been updated to imgui.
 2. Custom colors can now be added.
