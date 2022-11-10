@@ -1,19 +1,32 @@
+Version 1.81 - To be rolled out
+● Toggle command has been replaced with a button in the main menu.
+● Quality enhancement updates.
+● Minor bug fixes.
+
 Version 1.80
-1. Minor bug fixes.
+● Minor bug fixes.
 
 Version 1.79 - Huge Update!
-1. Whole script has been updated to imgui.
-2. Custom colors can now be added.
+● The entire script has been re-written and revised.
+● The entire script has been upgraded to imgui format.
+● Custom and alpha colors are now supported.
 
 Version 1.78
-1. News chat and donator chat has been added.
-2. Minor bug fixes.
+● News and donator chat colors are now supported.
+● Minor bug fixes.
 
 Version 1.77
-1. Minor bug fix for community chat.
+● Minor bug fix for community chat.
 
 Version 1.76
-1. Major bug fixes for community and helper chat.
+● Major bug fixes for community and helper chat.
 
 Version 1.75
-1. One click updation has been added.
+● One click updation has been added.
+
+Version 1.74
+● Quality enhancement update.
+
+Version 1.73
+● Community and Helper chat colors are now supported.
+● Minor bug fixes.
