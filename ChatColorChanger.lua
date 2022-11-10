@@ -1,19 +1,24 @@
 script_name("Chat Color Changer")
-script_author("Arafat#0502, Visage#6468")
+script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.78
-local script_version_text = '1.78'
-local ttlcolors = 42
+local script_version = 1.79
+local script_version_text = '1.79'
 
 require "moonloader"
 require "sampfuncs"
 local inicfg = require "inicfg"
+local imgui, ffi = require 'mimgui', require 'ffi'
+local new, str, sizeof = imgui.new, ffi.string, ffi.sizeof
 local se = require "lib.samp.events"
 local https = require 'ssl.https'
 local dlstatus = require('moonloader').download_status
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.lua"
 local update_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.txt"
+local updatelogs_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/Update_logs.txt"
+local encoding = require "encoding"
+encoding.default = 'CP1251'
+u8 = encoding.UTF8
 
 dir = getWorkingDirectory() .. "\\config\\Visage's revamped Config\\"
 dir2 = getWorkingDirectory() .. "\\config\\"
@@ -30,11 +35,10 @@ if not doesFileExist(config) then
     file:write(" ")
     file:close()
     local directIni = config
-    local mainIni =
-        inicfg.load(
-        inicfg.load(
-            {
+    local mainIni = inicfg.load(inicfg.load({
                 main = {
+                    autoupdate = true,
+                    autosave = true,
                     --[[ CHATS ]]
                     toggle = false,
                     togccg = false,
@@ -45,49 +49,36 @@ if not doesFileExist(config) then
                     togcccom = false,
                     togccf = false,
                     togcchc = false,
-                    dcommons = false,
+                    dcommons = true,
                     togccnews = false,
                     togccdc = false,
-                    --[[ COLORS ]]
-                    freqhider = 1,
-                    global = 1,
-                    newbie = 1,
-                    com = 1,
-                    hc = 1,
-                    family = 1,
-                    pradio = 1,
-                    dradio = 1,
-                    facradio = 1,
-                    dlspd = 1,
-                    dares = 1,
-                    dfmd = 1,
-                    dfbi = 1,
-                    dcommon = 1,
-                    news = 1,
-                    dc = 1,
-                    --[[ ADMIN CHAT (Removed)
-                    togccadminc = true,
-                    a7 = 42,
-                    a6 = 42,
-                    a5 = 42,
-                    a4 = 42,
-                    a3 = 42,
-                    a2 = 42,
-                    a1 = 42]]
+                    freqhider = false,
                     --[[CHAT TOGGLES]]
                     togdpd = false,
                     togdfbi = false,
                     togdares = false,
                     togdfmd = false,
-                    togdall = false,
+                    togdall = true,
+                    togddialog = false,
                     togfacrad = false,
-
-                }
-            },
-            directIni
-        )
-    )
-
+                },
+                --[[COLORS]]
+                    global = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    newbie = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    com = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    hc = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    family = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    pradio = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dradio = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    facradio = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dlspd = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dares = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dfmd = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dfbi = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dcommon = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    news = {r = 0.55, g = 0.21, b = 1, a = 1},
+                    dc = {r = 0.55, g = 0.21, b = 1, a = 1},
+            },directIni))
     inicfg.save(mainIni, directIni)
 end
 
@@ -95,588 +86,158 @@ local directIni = config
 local mainIni = inicfg.load(nil, directIni)
 inicfg.save(mainIni, directIni)
 
+local presettings = {
+    global = imgui.new.float[4](mainIni.global.r, mainIni.global.g, mainIni.global.b, mainIni.global.a),
+    newbie = imgui.new.float[4](mainIni.newbie.r, mainIni.newbie.g, mainIni.newbie.b, mainIni.newbie.a),
+    com = imgui.new.float[4](mainIni.com.r, mainIni.com.g, mainIni.com.b, mainIni.com.a),
+    hc = imgui.new.float[4](mainIni.hc.r, mainIni.hc.g, mainIni.hc.b, mainIni.hc.a),
+    family = imgui.new.float[4](mainIni.family.r, mainIni.family.g, mainIni.family.b, mainIni.family.a),
+    pradio = imgui.new.float[4](mainIni.pradio.r, mainIni.pradio.g, mainIni.pradio.b, mainIni.pradio.a),
+    dradio = imgui.new.float[4](mainIni.dradio.r, mainIni.dradio.g, mainIni.dradio.b, mainIni.dradio.a),
+    facradio = imgui.new.float[4](mainIni.facradio.r, mainIni.facradio.g, mainIni.facradio.b, mainIni.facradio.a),
+    dlspd = imgui.new.float[4](mainIni.dlspd.r, mainIni.dlspd.g, mainIni.dlspd.b, mainIni.dlspd.a),
+    dares = imgui.new.float[4](mainIni.dares.r, mainIni.dares.g, mainIni.dares.b, mainIni.dares.a),
+    dfmd = imgui.new.float[4](mainIni.dfmd.r, mainIni.dfmd.g, mainIni.dfmd.b, mainIni.dfmd.a),
+    dfbi = imgui.new.float[4](mainIni.dfbi.r, mainIni.dfbi.g, mainIni.dfbi.b, mainIni.dfbi.a),
+    dcommon = imgui.new.float[4](mainIni.dcommon.r, mainIni.dcommon.g, mainIni.dcommon.b, mainIni.dcommon.a),
+    news = imgui.new.float[4](mainIni.news.r, mainIni.news.g, mainIni.news.b, mainIni.news.a),
+    dc = imgui.new.float[4](mainIni.dc.r, mainIni.dc.g, mainIni.dc.b, mainIni.dc.a),
+}
+
+function SaveIni()
+    mainIni.global.r, mainIni.global.g, mainIni.global.b, mainIni.global.a = presettings.global[0], presettings.global[1], presettings.global[2], presettings.global[3]
+    mainIni.newbie.r, mainIni.newbie.g, mainIni.newbie.b, mainIni.newbie.a = presettings.newbie[0], presettings.newbie[1], presettings.newbie[2], presettings.newbie[3]
+    mainIni.com.r, mainIni.com.g, mainIni.com.b, mainIni.com.a = presettings.com[0], presettings.com[1], presettings.com[2], presettings.com[3]
+    mainIni.hc.r, mainIni.hc.g, mainIni.hc.b, mainIni.hc.a = presettings.hc[0], presettings.hc[1], presettings.hc[2], presettings.hc[3]
+    mainIni.family.r, mainIni.family.g, mainIni.family.b, mainIni.family.a = presettings.family[0], presettings.family[1], presettings.family[2], presettings.family[3]
+    mainIni.pradio.r, mainIni.pradio.g, mainIni.pradio.b, mainIni.pradio.a = presettings.pradio[0], presettings.pradio[1], presettings.pradio[2], presettings.pradio[3]
+    mainIni.dradio.r, mainIni.dradio.g, mainIni.dradio.b, mainIni.dradio.a = presettings.dradio[0], presettings.dradio[1], presettings.dradio[2], presettings.dradio[3]
+    mainIni.facradio.r, mainIni.facradio.g, mainIni.facradio.b, mainIni.facradio.a = presettings.facradio[0], presettings.facradio[1], presettings.facradio[2], presettings.facradio[3]
+    mainIni.dlspd.r, mainIni.dlspd.g, mainIni.dlspd.b, mainIni.dlspd.a = presettings.dlspd[0], presettings.dlspd[1], presettings.dlspd[2], presettings.dlspd[3]
+    mainIni.dares.r, mainIni.dares.g, mainIni.dares.b, mainIni.dares.a = presettings.dares[0], presettings.dares[1], presettings.dares[2], presettings.dares[3]
+    mainIni.dfmd.r, mainIni.dfmd.g, mainIni.dfmd.b, mainIni.dfmd.a = presettings.dfmd[0], presettings.dfmd[1], presettings.dfmd[2], presettings.dfmd[3]
+    mainIni.dfbi.r, mainIni.dfbi.g, mainIni.dfbi.b, mainIni.dfbi.a = presettings.dfbi[0], presettings.dfbi[1], presettings.dfbi[2], presettings.dfbi[3]
+    mainIni.dcommon.r, mainIni.dcommon.g, mainIni.dcommon.b, mainIni.dcommon.a = presettings.dcommon[0], presettings.dcommon[1], presettings.dcommon[2], presettings.dcommon[3]
+    mainIni.news.r, mainIni.news.g, mainIni.news.b, mainIni.news.a = presettings.news[0], presettings.news[1], presettings.news[2], presettings.news[3]
+    mainIni.dc.r, mainIni.dc.g, mainIni.dc.b, mainIni.dc.a = presettings.dc[0], presettings.dc[1], presettings.dc[2], presettings.dc[3]
+    inicfg.save(mainIni, directIni)
+end
+
+imgui.OnInitialize(function()
+	imgui.GetIO().IniFilename = nil
+    style()
+end)
+
+local updatelogs = nil
+local windno = 0
+local menu = false
+imgui.OnFrame(function() return menu and not isGamePaused() end,
+function()
+    width, height = getScreenResolution()
+    imgui.SetNextWindowPos(imgui.ImVec2(width / 2, height / 2), imgui.Cond.Always, imgui.ImVec2(0.5, 0.5))
+    imgui.SetNextWindowSize(imgui.ImVec2(500, 345), imgui.Cond.FirstUseEver)
+    imgui.BeginCustomTitle(u8"Chat Color Changer", 30, main_win, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
+
+        imgui.BeginChild("##1", imgui.ImVec2(130, 150), true)
+            if imgui.Button(u8'General Chats') then windno = 1 end
+            if imgui.Button(u8'Faction Chats') then windno = 2 end
+            if imgui.Button(u8'Family/Gang Chats') then windno = 3 end
+            if imgui.Button(u8'Staff Chats') then windno = 4 end
+            if imgui.Button(u8'Chat Toggler') then windno = 5 end
+        imgui.EndChild()
+
+        imgui.SetCursorPos(imgui.ImVec2(5, 190))
+
+        imgui.BeginChild("##2", imgui.ImVec2(130, 150), true)
+            if imgui.Button(u8'Update Logs') then windno = 6 updatelogs = https.request(updatelogs_url) end
+            if imgui.Button(u8'Update Script') then update_script(true) end
+            if imgui.Button(u8'Save Config') then SaveIni() end
+            if imgui.Button(u8'Reload Script') then SaveIni() thisScript():reload() end
+            if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
+            if imgui.Checkbox("Auto Save", new.bool(mainIni.main.autosave)) then mainIni.main.autosave = not mainIni.main.autosave end
+        imgui.EndChild()
+
+        imgui.SetCursorPos(imgui.ImVec2(140, 35))
+
+        imgui.BeginChild("##3", imgui.ImVec2(355, 305), true)
+            if windno == 1 then
+                if imgui.Checkbox("Global Chat", new.bool(mainIni.main.togccg)) then mainIni.main.togccg = not mainIni.main.togccg end
+                if mainIni.main.togccg then imgui.SameLine() imgui.ColorEdit4('##presettings.global', presettings.global, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Donator Chat", new.bool(mainIni.main.togccdc)) then mainIni.main.togccdc = not mainIni.main.togccdc end
+                if mainIni.main.togccdc then imgui.SameLine() imgui.ColorEdit4('##presettings.dc', presettings.dc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Portable Radio Chat", new.bool(mainIni.main.togccpr)) then mainIni.main.togccpr = not mainIni.main.togccpr end
+                if mainIni.main.togccpr then imgui.SameLine() imgui.ColorEdit4('##presettings.pradio', presettings.pradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Portable Radio Frequency Hider", new.bool(mainIni.main.freqhider)) then mainIni.main.freqhider = not mainIni.main.freqhider end
+            elseif windno == 2 then
+                if imgui.Checkbox("Faction Radio", new.bool(mainIni.main.togccr)) then mainIni.main.togccr = not mainIni.main.togccr end
+                if mainIni.main.togccr then imgui.SameLine() imgui.ColorEdit4('##presettings.facradio', presettings.facradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Department Radio", new.bool(mainIni.main.togccd)) then mainIni.main.togccd = not mainIni.main.togccd end
+                if mainIni.main.togccd then if imgui.Checkbox("Comman color for all departments:", new.bool(mainIni.main.dcommons)) then mainIni.main.dcommons = not mainIni.main.dcommons end end
+                if mainIni.main.dcommons and mainIni.main.togccd then imgui.SameLine() imgui.ColorEdit4('##presettings.dcommon', presettings.dcommon, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                if not mainIni.main.dcommons and mainIni.main.togccd then 
+                    imgui.Text(u8"LSPD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dlspd', presettings.dlspd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                    imgui.Text(u8"ARES:") imgui.SameLine() imgui.ColorEdit4('##presettings.dares', presettings.dares, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                    imgui.Text(u8"FBI:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfbi', presettings.dfbi, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                    imgui.Text(u8"LSFMD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfmd', presettings.dfmd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar)
+                end
+
+                if imgui.Checkbox("News Chat", new.bool(mainIni.main.togccnews)) then mainIni.main.togccnews = not mainIni.main.togccnews end
+                if mainIni.main.togccnews then imgui.SameLine() imgui.ColorEdit4('##presettings.news', presettings.news, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+            elseif windno == 3 then
+                if imgui.Checkbox("Family Chat", new.bool(mainIni.main.togccf)) then mainIni.main.togccf = not mainIni.main.togccf end
+                if mainIni.main.togccf then imgui.SameLine() imgui.ColorEdit4('##presettings.family', presettings.family, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+            elseif windno == 4 then
+                if imgui.Checkbox("Community Chat", new.bool(mainIni.main.togcccom)) then mainIni.main.togcccom = not mainIni.main.togcccom end
+                if mainIni.main.togcccom then imgui.SameLine() imgui.ColorEdit4('##presettings.com', presettings.com, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Helper Chat", new.bool(mainIni.main.togcchc)) then mainIni.main.togcchc = not mainIni.main.togcchc end
+                if mainIni.main.togcchc then imgui.SameLine() imgui.ColorEdit4('##presettings.hc', presettings.hc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                if imgui.Checkbox("Newbie Chat", new.bool(mainIni.main.togccn)) then mainIni.main.togccn = not mainIni.main.togccn end
+                if mainIni.main.togccn then imgui.SameLine() imgui.ColorEdit4('##presettings.newbie', presettings.newbie, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+            elseif windno == 5 then
+                if imgui.Checkbox("Toggle Faction Radio", new.bool(mainIni.main.togfacrad)) then mainIni.main.togfacrad = not mainIni.main.togfacrad end
+                if imgui.Checkbox("Toggle Department Radio", new.bool(mainIni.main.togddialog)) then mainIni.main.togddialog = not mainIni.main.togddialog end
+                if mainIni.main.togddialog then if imgui.Checkbox("Toggle all departments", new.bool(mainIni.main.togdall)) then mainIni.main.togdall = not mainIni.main.togdall end end
+                if not mainIni.main.togdall and mainIni.main.togddialog then
+                    if imgui.Checkbox("Toggle LSPD", new.bool(mainIni.main.togdpd)) then mainIni.main.togdpd = not mainIni.main.togdpd end
+                    if imgui.Checkbox("Toggle ARES", new.bool(mainIni.main.togdares)) then mainIni.main.togdares = not mainIni.main.togdares end
+                    if imgui.Checkbox("Toggle FBI", new.bool(mainIni.main.togdfbi)) then mainIni.main.togdfbi = not mainIni.main.togdfbi end
+                    if imgui.Checkbox("Toggle LSFMD", new.bool(mainIni.main.togdfmd)) then mainIni.main.togdfmd = not mainIni.main.togdfmd end
+                end
+            elseif windno == 6 then
+                imgui.SetCursorPos(imgui.ImVec2(75, 5))
+                imgui.Text("Update Logs - Current Version: "..script_version_text)
+                imgui.NewLine()
+                updatelogs_text = updatelogs:match(".+")
+	            if updatelogs_text ~= nil then
+                    imgui.Text(updatelogs_text)
+                end
+            end
+        imgui.EndChild()
+    imgui.End()
+end)
+
 function main()
     while not isSampAvailable() do wait(1000) end
-    sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}/ccHelp", -1)
-    update_script(false)
-    sampRegisterChatCommand("ccHelp", cmd_help)
+    sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}[/chatcolor].", -1)
+    if mainIni.main.autoupdate then update_script(false) end
     sampRegisterChatCommand("cc", cmd_toggle)
-    sampRegisterChatCommand("togcc", cmd_togchatcolor)
-    sampRegisterChatCommand("freqhider", freqhider)
-    sampRegisterChatCommand("ccupdate", update_script)
+    sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
     sampRegisterChatCommand("ccversion", function()
 		lua_thread.create(function()
             sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Current version: {00b7ff}[%s]{FFFFFF}. Use {00b7ff}[/ccupdate]{FFFFFF} to check for updates.", script.this.name, script_version_text), -1)
 		end)
 	end)
-    sampRegisterChatCommand(
-        "SetGC",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.global = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your global chat color has successfully been set to " .. tColors[mainIni.main.global] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.global]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogGlobal()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setnewbie",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.newbie = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your newbie chat color has successfully been set to " .. tColors[mainIni.main.newbie] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.newbie]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogNewbie()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setpr",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.pradio = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your portable radio chat color has successfully been set to " .. tColors[mainIni.main.pradio] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.pradio]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogPRadio()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setfacr",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.facradio = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your faction radio chat color has successfully been set to " .. tColors[mainIni.main.facradio] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.facradio]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogFacRadio()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setf",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.family = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your family chat color has successfully been set to " .. tColors[mainIni.main.family] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.family]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogFamily()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Sethc",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.hc = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your helper chat color has successfully been set to " .. tColors[mainIni.main.hc] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.hc]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogHelperC()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setc",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.com = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your community chat color has successfully been set to " .. tColors[mainIni.main.com] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.com]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogCom()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setnews",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.news = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your news chat color has successfully been set to " .. tColors[mainIni.main.news] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.news]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogNewsC()
-            end
-        end
-    )
-    sampRegisterChatCommand(
-        "Setdc",
-        function(clr)
-            if tonumber(clr) and tonumber(clr) >= 0 and tonumber(clr) <= ttlcolors then
-                mainIni.main.dc = tonumber(clr)
-                if inicfg.save(mainIni, directIni) then
-                    sampAddChatMessage(
-                        "Your donator chat color has successfully been set to " .. tColors[mainIni.main.dc] .. clr,
-                        string.format("0x%s", tColors[mainIni.main.dc]:gsub("[{}]", ""))
-                    )
-                end
-            else
-                DialogDcC()
-            end
-        end
-    )
-    --sampRegisterChatCommand("Setadminc", DialogAdminChat)
-    sampRegisterChatCommand("Setfacd", DialogFacD)
-    sampRegisterChatCommand("chattog", DialogCTog)
-    while true do
-        wait(0)
-        local resultglobal, button, list, input = sampHasDialogRespond(5481)
-        if resultglobal then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.global = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogGlobal()
-            end
-        end
-        local resultnewbie, button, list, input = sampHasDialogRespond(5482)
-        if resultnewbie then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.newbie = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogNewbie()
-            end
-        end
-        local resultpradio, button, list, input = sampHasDialogRespond(5483)
-        if resultpradio then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.pradio = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogPRadio()
-            end
-        end
-        local resultfacradio, button, list, input = sampHasDialogRespond(5485)
-        if resultfacradio then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.facradio = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogFacRadio()
-            end
-        end
-        local resultcom, button, list, input = sampHasDialogRespond(5486)
-        if resultcom then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.com = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogCom()
-            end
-        end
-        local resultfamily, button, list, input = sampHasDialogRespond(5487)
-        if resultfamily then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.family = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogFamily()
-            end
-        end
-        local resulthc, button, list, input = sampHasDialogRespond(5488)
-        if resulthc then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.hc = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogHelperC()
-            end
-        end
-        --[[local resultadminchat, button, list, input = sampHasDialogRespond(5489)
-        if resultadminchat then
-            if button == 1 then
-                if list == 0 then
-                    Dialoga7()
-                elseif list == 1 then
-                    Dialoga6()
-                elseif list == 2 then
-                    Dialoga5()
-                elseif list == 3 then
-                    Dialoga4()
-                elseif list == 4 then
-                    Dialoga3()
-                elseif list == 5 then
-                    Dialoga2()
-                elseif list == 6 then
-                    Dialoga1()
-                end
-            end
-        end
-        local resulta7, button, list, input = sampHasDialogRespond(5490)
-        if resulta7 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a7 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga7()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta6, button, list, input = sampHasDialogRespond(5491)
-        if resulta6 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a6 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga6()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta5, button, list, input = sampHasDialogRespond(5492)
-        if resulta5 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a5 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga5()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta4, button, list, input = sampHasDialogRespond(5493)
-        if resulta4 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a4 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga4()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta3, button, list, input = sampHasDialogRespond(5494)
-        if resulta3 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a3 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga3()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta2, button, list, input = sampHasDialogRespond(5495)
-        if resulta2 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a2 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga2()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end
-        local resulta1, button, list, input = sampHasDialogRespond(5496)
-        if resulta1 then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.a1 = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialoga1()
-            elseif button == 0 then
-                DialogAdminChat()
-            end
-        end]]
-        local resultfacd, button, list, input = sampHasDialogRespond(5497)
-        if resultfacd then
-            if button == 1 then
-                if list == 0 then
-                    DialogDlspd()
-                elseif list == 1 then
-                    DialogDares()
-                elseif list == 2 then
-                    Dialogdfbi()
-                elseif list == 3 then
-                    Dialogdfmd()
-                elseif list == 4 then
-                    mainIni.main.dcommons = not mainIni.main.dcommons
-                    DialogFacD()
-                elseif list == 5 then
-                    Dialogdcommon()
-                end
-            end
-        end
-        local resultdlspd, button, list, input = sampHasDialogRespond(5498)
-        if resultdlspd then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dlspd = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogDlspd()
-            elseif button == 0 then
-                DialogFacD()
-            end
-        end
-        local resultdares, button, list, input = sampHasDialogRespond(5499)
-        if resultdares then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dares = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogDares()
-            elseif button == 0 then
-                DialogFacD()
-            end
-        end
-        local resultdfbi, button, list, input = sampHasDialogRespond(5500)
-        if resultdfbi then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dfbi = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialogdfbi()
-            elseif button == 0 then
-                DialogFacD()
-            end
-        end
-        local resultdfmd, button, list, input = sampHasDialogRespond(5501)
-        if resultdfmd then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dfmd = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialogdfmd()
-            elseif button == 0 then
-                DialogFacD()
-            end
-        end
-        local resultdcommon, button, list, input = sampHasDialogRespond(5502)
-        if resultdcommon then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dcommon = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                Dialogdcommon()
-            elseif button == 0 then
-                DialogFacD()
-            end
-        end
-        local resultctog, button, list, input = sampHasDialogRespond(5503)
-        if resultctog then
-            if button == 1 then
-                if list == 0 then
-                    Dialogtogd()
-                elseif list == 1 then
-                    mainIni.main.togfacrad = not mainIni.main.togfacrad
-                    DialogCTog()
-                end
-            end
-        end
-        local resultctogd, button, list, input = sampHasDialogRespond(5504)
-        if resultctogd then
-            if button == 1 then
-                if list == 0 then
-                    mainIni.main.togdpd = not mainIni.main.togdpd
-                    Dialogtogd()
-                elseif list == 1 then
-                    mainIni.main.togdares = not mainIni.main.togdares
-                    Dialogtogd()
-                elseif list == 2 then
-                    mainIni.main.togdfbi = not mainIni.main.togdfbi
-                    Dialogtogd()
-                elseif list == 3 then
-                    mainIni.main.togdfmd = not mainIni.main.togdfmd
-                    Dialogtogd()
-                elseif list == 4 then
-                    mainIni.main.togdall = not mainIni.main.togdall
-                    Dialogtogd()
-                end
-            elseif button == 0 then
-                DialogCTog()
-            end
-        end
-        local resultnews, button, list, input = sampHasDialogRespond(5505)
-        if resultnews then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.news = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogNewsC()
-            end
-        end
-        local resultdc, button, list, input = sampHasDialogRespond(5506)
-        if resultdc then
-            if button == 1 then
-                if tonumber(input) and tonumber(input) >= 0 and tonumber(input) <= ttlcolors then
-                    mainIni.main.dc = tonumber(input)
-                    inicfg.save(mainIni, directIni)
-                end
-                DialogDcC()
-            end
-        end
-    end
-end
-
-function cmd_help()
-    if (mainIni.main.toggle) then
-        statuscc = "{00FF00}[Enabled] "
-    else
-        statuscc = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccg) then
-        statusgca = "{00FF00}[Enabled] "
-    else
-        statusgca = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccpr) then
-        statuspr = "{00FF00}[Enabled] "
-    else
-        statuspr = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.freqhider == 0) then
-        statusfh = "{00FF00}[Enabled] "
-    elseif mainIni.main.freqhider == 1 then
-        statusfh = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccr) then
-        statusr = "{00FF00}[Enabled] "
-    else
-        statusr = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccd) then
-        statusd = "{00FF00}[Enabled] "
-    else
-        statusd = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccf) then
-        statusf = "{00FF00}[Enabled] "
-    else
-        statusf = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togcccom) then
-        statuscom = "{00FF00}[Enabled] "
-    else
-        statuscom = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togcchc) then
-        statushc = "{00FF00}[Enabled] "
-    else
-        statushc = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccn) then
-        statusn = "{00FF00}[Enabled] "
-    else
-        statusn = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccnews) then
-        statusnews = "{00FF00}[Enabled] "
-    else
-        statusnews = "{FF0000}[Disabled] "
-    end
-
-    if (mainIni.main.togccdc) then
-        statusdc = "{00FF00}[Enabled] "
-    else
-        statusdc = "{FF0000}[Disabled] "
-    end
-
-    --[[if (mainIni.main.togccadminc) then
-        statusac = "{00FF00}[Enabled] "
-    else
-        statusac = "{FF0000}[Disabled] "
-    end]]
-	sampAddChatMessage("==============================", -1)
-	sampAddChatMessage("{FFFFFF}              ---> {7700FF}Chat Color {FFFFFF}<---", -1)
-	sampAddChatMessage(statuscc.."{FFFFFF}/cc{FFFF00} - {00FF00}Enables {FFFFFF}/ {FF0000}Disables{FFFF00} chat color.", -1)
-	sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/togcc [Name]{FFFF00} - Toggle specific chat color.", -1)
-    sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/chattog {FFFF00} - Toggle specific chats.", -1)
-    sampAddChatMessage("  {FFFF00}[INFO]    {FFFFFF}/ccupdate{FFFF00} - Updates the script to the latest version.", -1)
-    sampAddChatMessage("======= {7700FF}General Chats {FFFFFF}=======", -1)
-	sampAddChatMessage(statusgca.."{FFFFFF}/setgc{FFFF00} - Sets custom global chat color.", -1)
-    sampAddChatMessage(statusdc.."{FFFFFF}/setdc{FFFF00} - Sets custom donator chat color.", -1)
-	sampAddChatMessage(statuspr.."{FFFFFF}/setpr{FFFF00} - Sets custom portable radio chat color.", -1)
-    sampAddChatMessage(statusfh.."{FFFFFF}/freqhider{FFFF00} - hides portable radio frequency.", -1)
-	sampAddChatMessage("======= {7700FF}Faction Chats {FFFFFF}=======", -1)
-    sampAddChatMessage(statusr.."{FFFFFF}/setfacr{FFFF00} - Sets custom faction radio chat color.", -1)
-    sampAddChatMessage(statusd.."{FFFFFF}/setfacd{FFFF00} - Sets custom faction department radio chat color or separate color for each department.", -1)
-    sampAddChatMessage(statusnews.."{FFFFFF}/setnews{FFFF00} - Sets custom news chat color.", -1)
-    sampAddChatMessage("======= {7700FF}Family/Gang Chats {FFFFFF}=======", -1)
-    sampAddChatMessage(statusf.."{FFFFFF}/setf{FFFF00} - Sets custom family chat color.", -1)
-    sampAddChatMessage("======= {7700FF}Staff Chats {FFFFFF}=======", -1)
-    sampAddChatMessage(statuscom.."{FFFFFF}/setc{FFFF00} - Sets custom community chat color.", -1)
-    sampAddChatMessage(statushc.."{FFFFFF}/sethc{FFFF00} - Sets custom helper chat color.", -1)
-    sampAddChatMessage(statusn.."{FFFFFF}/setnewbie{FFFF00} - Sets custom newbie chat color.", -1)
-    --sampAddChatMessage(statusac.."{FFFFFF}/SetAdminc{FFFF00} - Sets custom admin chat color for each rank separately.", -1)
-    sampAddChatMessage("======= {7700FF}Credits {FFFFFF}=======", -1)
-    sampAddChatMessage("{FF0000}Arafat N Uzumaki{FFFF00} For the original mod.", -1)
-    sampAddChatMessage("{FF0000}Visage A.K.A. Ishaan Dunne{FFFF00} For revamping the mod.", -1)
-	sampAddChatMessage("==============================", -1)
 end
 
 function se.onServerMessage(clr, msg)
     if not mainIni.main.toggle or not mainIni.main.togccpr then
-        if (mainIni.main.freqhider == 0 and clr == 1845194239) then
+        if (mainIni.main.freqhider and clr == 1845194239) then
             if msg:match("**.Radio %(.+% kHz%).%**.+[a-zA-Z_]+%:") then
                 msg = msg:gsub("**.Radio %(.+% kHz%).", "", 1)
                 sampAddChatMessage(msg, 7207789)
@@ -686,16 +247,18 @@ function se.onServerMessage(clr, msg)
     end
     if mainIni.main.toggle then
         if (clr == -2686902) then
-            if msg:match("** LSPD") and mainIni.main.togdpd then
-                return false
-            elseif msg:match("** ARES") and mainIni.main.togdares then
-                return false
-            elseif msg:match("** FBI") and mainIni.main.togdfbi then
-                return false
-            elseif msg:match("** LSFMD") and mainIni.main.togdfmd then
-                return false
-            elseif msg:match("** .**") and mainIni.main.togdall then
-                return false
+            if mainIni.main.togddialog then
+                if msg:match("** LSPD") and mainIni.main.togdpd then
+                    return false
+                elseif msg:match("** ARES") and mainIni.main.togdares then
+                    return false
+                elseif msg:match("** FBI") and mainIni.main.togdfbi then
+                    return false
+                elseif msg:match("** LSFMD") and mainIni.main.togdfmd then
+                    return false
+                elseif msg:match("** .**") and mainIni.main.togdall then
+                    return false
+                end
             end
         end
         if (clr == -1920073729 and mainIni.main.togfacrad) then
@@ -705,489 +268,69 @@ function se.onServerMessage(clr, msg)
         end
         if (clr == -5963606 and mainIni.main.togccg) then
             if msg:match("%(%( .*") then
-                return {string.format("0x%sFF", tColors[mainIni.main.global]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.global[3] * 255, presettings.global[0] * 255, presettings.global[1] * 255, presettings.global[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == 2108620799 and mainIni.main.togccn) then
             if msg:match("** .*") then
-                return {string.format("0x%sFF", tColors[mainIni.main.newbie]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.newbie[3] * 255, presettings.newbie[0] * 255, presettings.newbie[1] * 255, presettings.newbie[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == 1845194239 and mainIni.main.togccpr) then
             if msg:match("**.Radio %(.+% kHz%).%**.+[a-zA-Z_]+%:") then
-                if (mainIni.main.freqhider == 1) then
-                    return {string.format("0x%sFF", tColors[mainIni.main.pradio]:gsub("[{}]", "")), msg}
+                if not (mainIni.main.freqhider) then
+                    return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)), msg}
                 else
                     msg = msg:gsub("**.Radio %(.+% kHz%).", "", 1)
-                    return {string.format("0x%sFF", tColors[mainIni.main.pradio]:gsub("[{}]", "")), msg}
+                    return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)), msg}
                 end
             end
         end
         if (clr == -1920073729 and mainIni.main.togccr) then
             if msg:match("** .**") then
-                return {string.format("0x%sFF", tColors[mainIni.main.facradio]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.facradio[3] * 255, presettings.facradio[0] * 255, presettings.facradio[1] * 255, presettings.facradio[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == -2686902 and mainIni.main.togccd) and not mainIni.main.dcommons then
             if msg:match("** LSPD") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dlspd]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dlspd[3] * 255, presettings.dlspd[0] * 255, presettings.dlspd[1] * 255, presettings.dlspd[2] * 255)), 3, 8)), msg}
             elseif msg:match("** ARES") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dares]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dares[3] * 255, presettings.dares[0] * 255, presettings.dares[1] * 255, presettings.dares[2] * 255)), 3, 8)), msg}
             elseif msg:match("** FBI") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dfbi]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dfbi[3] * 255, presettings.dfbi[0] * 255, presettings.dfbi[1] * 255, presettings.dfbi[2] * 255)), 3, 8)), msg}
             elseif msg:match("** LSFMD") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dfmd]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dfmd[3] * 255, presettings.dfmd[0] * 255, presettings.dfmd[1] * 255, presettings.dfmd[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == -2686902 and mainIni.main.dcommons and mainIni.main.togccd) then
             if msg:match("** .**") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dcommon]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dradio[3] * 255, presettings.dradio[0] * 255, presettings.dradio[1] * 255, presettings.dradio[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == 869072810 and mainIni.main.togcccom) then
             if msg:match("** .+Admin") or msg:match("*** .+Helper") or msg:match("*** Former Admin") or msg:match("** Helper Manager") or msg:match("** Management") or msg:match("** Asst. Management") or msg:match("** Assistant Management") then
-                return {string.format("0x%sFF", tColors[mainIni.main.com]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.com[3] * 255, presettings.com[0] * 255, presettings.com[1] * 255, presettings.com[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == 33357768 and mainIni.main.togccf) then
             if msg:match("** .**") then
-                return {string.format("0x%sFF", tColors[mainIni.main.family]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.family[3] * 255, presettings.family[0] * 255, presettings.family[1] * 255, presettings.family[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == -1511456854 and mainIni.main.togcchc) then
             if msg:match("*** .*") then
-                return {string.format("0x%sFF", tColors[mainIni.main.hc]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.hc[3] * 255, presettings.hc[0] * 255, presettings.hc[1] * 255, presettings.hc[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == -1697828182 and mainIni.main.togccnews) then
             if msg:match("NR .+*") or msg:match("Live News Reporter .+*") or msg:match("Live Interview Guest .+*") then
-                return {string.format("0x%sFF", tColors[mainIni.main.news]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.news[3] * 255, presettings.news[0] * 255, presettings.news[1] * 255, presettings.news[2] * 255)), 3, 8)), msg}
             end
         end
         if (clr == -1210979584 and mainIni.main.togccdc) then
             if msg:match("%(%( .*") then
-                return {string.format("0x%sFF", tColors[mainIni.main.dc]:gsub("[{}]", "")), msg}
+                return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.dc[3] * 255, presettings.dc[0] * 255, presettings.dc[1] * 255, presettings.dc[2] * 255)), 3, 8)), msg}
             end
-        end
-    end
-end
-
-function DialogGlobal()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5481, "{ffffff}Global (g) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.global]..mainIni.main.global..'\n\n'..tColors[mainIni.main.global].."(( Level 69 Player Ishaan Dunne: Being Gay Is Ok))", "Select", "Close", 1)
-end
-
-function DialogNewbie()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5482, "{ffffff}Newbie (newb) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.newbie]..mainIni.main.newbie..'\n\n'..tColors[mainIni.main.newbie].."** Head Helper John Panda: OOC Issue.", "Select", "Close", 1)
-end
-
-function DialogPRadio()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-    if (mainIni.main.freqhider == 0) then
-        sampShowDialog(5483, "{ffffff}Portable Radio (pr) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.pradio]..mainIni.main.pradio..'\n\n {ffffff}Frequency Hider is currently enabled.\n\n'..tColors[mainIni.main.pradio].."** Ishaan Dunne: #Gay", "Select", "Close", 1)
-    elseif (mainIni.main.freqhider == 1) then
-	    sampShowDialog(5483, "{ffffff}Portable Radio (pr) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.pradio]..mainIni.main.pradio..'\n\n {ffffff}Frequency Hider is currently disabled.\n\n'..tColors[mainIni.main.pradio].."** Radio (1234 kHz) ** Ishaan Dunne: #Gay", "Select", "Close", 1)
-    end
-end
-
-function DialogFacRadio()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5485, "{ffffff}Faction Radio (r) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.facradio]..mainIni.main.facradio..'\n\n'..tColors[mainIni.main.facradio].."** PTL Captain Kaden Hodges: I'm Ishaan's dad.", "Select", "Close", 1)
-end
-
-function DialogCom()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5486, "{ffffff}Community (c) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.com]..mainIni.main.com..'\n\n'..tColors[mainIni.main.com].."*** Former Admin Rob Turt: Parking a BMX on roof is NOT PG.", "Select", "Close", 1)
-end
-
-function DialogFamily()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5487, "{ffffff}Family (f) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.family]..mainIni.main.family..'\n\n'..tColors[mainIni.main.family].."** (6) Leader Ezio S Corleone: rush inside **", "Select", "Close", 1)
-end
-
-function DialogHelperC()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5488, "{ffffff}Helper (hc) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.hc]..mainIni.main.hc..'\n\n'..tColors[mainIni.main.hc].."*** Head Helper John Panda: Relog B69 please.", "Select", "Close", 1)
-end
-
---[[function DialogAdminChat()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-    sampShowDialog(5489, "Admin (a) Chat Colors", 'Rank\tCurrent Color\n\
-{ae00a8}Management\t'..tColors[mainIni.main.a7]..mainIni.main.a7..'\n\
-{910055}Assistant Management\t'..tColors[mainIni.main.a6]..mainIni.main.a6..'\n\
-{d5010b}Head Admin\t'..tColors[mainIni.main.a5]..mainIni.main.a5..'\n\
-{ffaa65}Senior Admin\t'..tColors[mainIni.main.a4]..mainIni.main.a4..'\n\
-{fdee00}General Admin\t'..tColors[mainIni.main.a3]..mainIni.main.a3..'\n\
-{44f037}Junior Admin\t'..tColors[mainIni.main.a2]..mainIni.main.a2..'\n\
-Secret Admin\t'..tColors[mainIni.main.a1]..mainIni.main.a1, "Select", "Close", DIALOG_STYLE_TABLIST_HEADERS);
-end
-
-function Dialoga7()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5490, "{ffffff}Management Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a7]..mainIni.main.a7..'\n\n'..tColors[mainIni.main.a7].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga6()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5491, "{ffffff}Assistant Management Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a6]..mainIni.main.a6..'\n\n'..tColors[mainIni.main.a6].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga5()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5492, "{ffffff}Head Admin Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a5]..mainIni.main.a5..'\n\n'..tColors[mainIni.main.a5].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga4()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5493, "{ffffff}Senior Admin Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a4]..mainIni.main.a4..'\n\n'..tColors[mainIni.main.a4].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga3()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5494, "{ffffff}General Admin Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a3]..mainIni.main.a3..'\n\n'..tColors[mainIni.main.a3].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga2()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5495, "{ffffff}Junior Admin Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a2]..mainIni.main.a2..'\n\n'..tColors[mainIni.main.a2].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end
-
-function Dialoga1()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5496, "{ffffff}Secret Admin Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.a1]..mainIni.main.a1..'\n\n'..tColors[mainIni.main.a1].."*** Head Helper John Panda: Relog B69 please.", "Select", "Back", 1)
-end]]
-
-function DialogFacD()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-
-    if mainIni.main.dcommons then
-        commonst = "{00FF00}Enabled"
-    else
-        commonst = "{FF0000}Disabled"
-    end
-
-    sampShowDialog(5497, "Department (d) Chat Colors", 'Department\tCurrent Color\n\
-{001aff}LSPD\t'..tColors[mainIni.main.dlspd]..mainIni.main.dlspd..'\n\
-{1c6486}ARES\t'..tColors[mainIni.main.dares]..mainIni.main.dares..'\n\
-{7789ff}FBI\t'..tColors[mainIni.main.dfbi]..mainIni.main.dfbi..'\n\
-{ffb3fc}LSFMD\t'..tColors[mainIni.main.dfmd]..mainIni.main.dfmd..'\n\
-{ffffff}Common Color for all departments\t'..commonst..'\n\
-{ffffff}Common Color\t'..tColors[mainIni.main.dcommon]..mainIni.main.dcommon, "Select", "Close", DIALOG_STYLE_TABLIST_HEADERS);
-end
-
-function DialogDlspd()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5498, "{ffffff}LSPD Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dlspd]..mainIni.main.dlspd..'\n\n'..tColors[mainIni.main.dlspd].."** LSPD PTL Lieutenant Ishaan Dunne: Never gonna give you up", "Select", "Back", 1)
-end
-
-function DialogDares()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5499, "{ffffff}ARES Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dares]..mainIni.main.dares..'\n\n'..tColors[mainIni.main.dares].."** ARES Major Alex Lewis: No one asked", "Select", "Back", 1)
-end
-
-function Dialogdfbi()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5500, "{ffffff}FBI Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dfbi]..mainIni.main.dfbi..'\n\n'..tColors[mainIni.main.dfbi].."** FBI CID Special Agent Carl Wise: Regroup at P13 sur", "Select", "Back", 1)
-end
-
-function Dialogdfmd()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5501, "{ffffff}LSFMD Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dfmd]..mainIni.main.dfmd..'\n\n'..tColors[mainIni.main.dfmd].."** LSFMD Paramedic Larry Burnwood: Never gonna let you down", "Select", "Back", 1)
-end
-
-function Dialogdcommon()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5502, "{ffffff}Common Department Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dcommon]..mainIni.main.dcommon..'\n\n'..tColors[mainIni.main.dcommon].."Use your brain please.", "Select", "Back", 1)
-end
-
-function DialogCTog()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-
-    if mainIni.main.togfacrad then
-        togfacradst = "{00FF00}Enabled"
-    else
-        togfacradst = "{FF0000}Disabled"
-    end
-    sampShowDialog(5503, "Chat Toggler", 'Chats\tStatus\n\
-{ffffff}Department Radio (d)\tOptions\n\
-{ffffff}Faction Radio (r)\t'..togfacradst, "Toggle", "Close", DIALOG_STYLE_TABLIST_HEADERS);
-end
-
-function Dialogtogd()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-
-    if mainIni.main.togdpd then
-        togdpdst = "{00FF00}Enabled"
-    else
-        togdpdst = "{FF0000}Disabled"
-    end
-    if mainIni.main.togdfbi then
-        togdfbist = "{00FF00}Enabled"
-    else
-        togdfbist = "{FF0000}Disabled"
-    end
-    if mainIni.main.togdares then
-        togdaresst = "{00FF00}Enabled"
-    else
-        togdaresst = "{FF0000}Disabled"
-    end
-    if mainIni.main.togdfmd then
-        togdfmdst = "{00FF00}Enabled"
-    else
-        togdfmdst = "{FF0000}Disabled"
-    end
-    if mainIni.main.togdall then
-        togdallst = "{00FF00}Enabled"
-    else
-        togdallst = "{FF0000}Disabled"
-    end
-    sampShowDialog(5504, "Department (d) Chat Toggler", 'Department\tStatus\n\
-{001aff}LSPD\t'..togdpdst..'\n\
-{1c6486}ARES\t'..togdaresst..'\n\
-{7789ff}FBI\t'..togdfbist..'\n\
-{ffb3fc}LSFMD\t'..togdfmdst..'\n\
-{ffffff}Toggle All Departments\t'..togdallst, "Toggle", "Back", DIALOG_STYLE_TABLIST_HEADERS);
-end
-
-function DialogNewsC()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5505, "{ffffff}News Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.news]..mainIni.main.news..'\n\n'..tColors[mainIni.main.news].."NR Memphis Wise: Few lottery tickets are still left.", "Select", "Close", 1)
-end
-
-function DialogDcC()
-	local examples = ''
-	for k, v in pairs(tColors) do
-		examples = examples..v..k..' '
-	end
-	sampShowDialog(5506, "{ffffff}Donator (dc) Chat Color", '{1dbaf2}Select you color:\n'..examples..'\n\n{ffffff}Curent Color: '..tColors[mainIni.main.dc]..mainIni.main.dc..'\n\n'..tColors[mainIni.main.dc].."(( Diamond Donator Kenny Dawn: Hi, I have no life. ))", "Select", "Close", 1)
-end
-
-function cmd_togchatcolor(args)
-	args = string.lower(args)
-	if #args == 0 then
-		sampAddChatMessage("{FF0000}Invalid Usage: {FFFFFF}/togcc [Name]")
-		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc, News, Dc", -1)
-	elseif (args == "global") then
-		if mainIni.main.togccg then
-			mainIni.main.togccg = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Global Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccg = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Global Chat Color.", -1)
-			end
-		end
-	elseif (args == "newbie") then			
-		if mainIni.main.togccn then
-			mainIni.main.togccn = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Newbie Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccn = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Newbie Chat Color.", -1)
-			end
-		end
-	elseif (args == "pr") then	
-		if mainIni.main.togccpr then
-			mainIni.main.togccpr = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Portable Radio Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccpr = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Portable Radio Chat Color.", -1)
-			end
-		end	
-    elseif (args == "facd") then			
-		if mainIni.main.togccd then
-			mainIni.main.togccd = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Faction Deparment Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccd = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Faction Department Chat Color.", -1)
-			end
-		end
-    elseif (args == "facr") then			
-		if mainIni.main.togccr then
-			mainIni.main.togccr = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Faction Radio Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccr = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Faction Radio Chat Color.", -1)
-			end
-		end
-    elseif (args == "c") then			
-		if mainIni.main.togcccom then
-			mainIni.main.togcccom = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Community Chat Color.", -1)
-			end
-		else
-			mainIni.main.togcccom = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Community Chat Color.", -1)
-			end
-		end
-    elseif (args == "f") then			
-		if mainIni.main.togccf then
-			mainIni.main.togccf = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Family Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccf = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Family Chat Color.", -1)
-			end
-		end
-    elseif (args == "hc") then			
-		if mainIni.main.togcchc then
-			mainIni.main.togcchc = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Helper Chat Color.", -1)
-			end
-		else
-			mainIni.main.togcchc = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Helper Chat Color.", -1)
-			end
-		end
-    --[[elseif (args == "adminc") then			
-		if mainIni.main.togccadminc then
-			mainIni.main.togccadminc = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Admin Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccadminc = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Admin Chat Color.", -1)
-			end
-		end]]
-    elseif (args == "news") then			
-		if mainIni.main.togccnews then
-			mainIni.main.togccnews = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}News Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccnews = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}News Chat Color.", -1)
-			end
-		end
-    elseif (args == "dc") then			
-		if mainIni.main.togccdc then
-			mainIni.main.togccdc = false
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {FF0000}Disabled {FFFFFF}Donator Chat Color.", -1)
-			end
-		else
-			mainIni.main.togccdc = true
-			if inicfg.save(mainIni, directIni) then
-				sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled {FFFFFF}Donator Chat Color.", -1)
-			end
-		end
-	else
-		sampAddChatMessage("{FF0000}Invalid Usage: {FFFFFF}/togcc [Name]")
-		sampAddChatMessage("{9E9E9E}Available names: Global, Newbie, Pr, FacD, FacR, C, F, Hc, News, Dc", -1)
-	end
-end
-
-function freqhider()
-    if (mainIni.main.freqhider == 0) then
-        mainIni.main.freqhider = 1
-        if inicfg.save(mainIni, directIni) then
-            sampAddChatMessage("{7700FF}FreqHider{ffffff}: {FF0000}Disabled", -1)
-        end
-    else
-        mainIni.main.freqhider = 0
-        if inicfg.save(mainIni, directIni) then
-            sampAddChatMessage("{7700FF}FreqHider{ffffff}: {00ff00}Enabled", -1)
         end
     end
 end
@@ -1196,12 +339,12 @@ function cmd_toggle()
 	if mainIni.main.toggle then
 		mainIni.main.toggle = false
 		if inicfg.save(mainIni, directIni) then
-			sampAddChatMessage("{7700FF}Chat Color{ffffff}: {ff0000}Disabled", -1)
+			sampAddChatMessage("{7700FF}Chat Color Changer{ffffff}: {ff0000}Disabled", -1)
 		end
 	else
 		mainIni.main.toggle = true
 		if inicfg.save(mainIni, directIni) then
-			sampAddChatMessage("{7700FF}Chat Color{ffffff}: {00ff00}Enabled", -1)
+			sampAddChatMessage("{7700FF}Chat Color Changer{ffffff}: {00ff00}Enabled", -1)
 		end
 	end
 end
@@ -1231,48 +374,119 @@ function update_script(noupdatecheck)
 	end
 end
 
-tColors = {
-    [0] = "{911600}",
-    [1] = "{fc0303}",
-    [2] = "{fc4503}",
-    [3] = "{fc7703}",
-    [4] = "{b06e04}",
-    [5] = "{fc9d03}",
-    [6] = "{fcbe03}",
-    [7] = "{fceb03}",
-    [8] = "{c2fc03}",
-    [9] = "{84fc03}",
-    [10] = "{258f04}",
-    [11] = "{3dfc03}",
-    [12] = "{03fc5e}",
-    [13] = "{03fc90}",
-    [14] = "{03fcc2}",
-    [15] = "{049171}",
-    [16] = "{03fce7}",
-    [17] = "{03dffc}",
-    [18] = "{03c2fc}",
-    [19] = "{03a1fc}",
-    [20] = "{0384fc}",
-    [21] = "{035efc}",
-    [22] = "{0328fc}",
-    [23] = "{45039c}",
-    [24] = "{6f03fc}",
-    [25] = "{9003fc}",
-    [26] = "{be03fc}",
-    [27] = "{e303fc}",
-    [28] = "{fc03e7}",
-    [29] = "{fc03b1}",
-    [30] = "{fc0390}",
-    [31] = "{fc035a}",
-    [32] = "{a1033a}",
-    [33] = "{b53504}",
-    [34] = "{802603}",
-    [35] = "{351204}",
-    [36] = "{f29999}",
-    [37] = "{f77474}",
-    [38] = "{ff5e5e}",
-    [39] = "{5c4c45}",
-    [40] = "{373534}",
-    [41] = "{000000}",
-    [42] = "{d8d8d8}"
-}
+function style()
+    imgui.SwitchContext()
+    --==[ STYLE ]==--
+    imgui.GetStyle().WindowPadding = imgui.ImVec2(5, 5)
+    imgui.GetStyle().FramePadding = imgui.ImVec2(5, 2)
+    imgui.GetStyle().ItemSpacing = imgui.ImVec2(5, 5)
+    imgui.GetStyle().ItemInnerSpacing = imgui.ImVec2(4, 4)
+    imgui.GetStyle().TouchExtraPadding = imgui.ImVec2(5, 5)
+    imgui.GetStyle().IndentSpacing = 5
+    imgui.GetStyle().ScrollbarSize = 10
+    imgui.GetStyle().GrabMinSize = 10
+
+    --==[ BORDER ]==--
+    imgui.GetStyle().WindowBorderSize = 0
+    imgui.GetStyle().ChildBorderSize = 1
+    imgui.GetStyle().PopupBorderSize = 0
+    imgui.GetStyle().FrameBorderSize = 0
+    imgui.GetStyle().TabBorderSize = 0
+
+    --==[ ROUNDING ]==--
+    imgui.GetStyle().WindowRounding = 5
+    imgui.GetStyle().ChildRounding = 5
+    imgui.GetStyle().FrameRounding = 5
+    imgui.GetStyle().PopupRounding = 5
+    imgui.GetStyle().ScrollbarRounding = 5
+    imgui.GetStyle().GrabRounding = 5
+    imgui.GetStyle().TabRounding = 5
+
+    --==[ ALIGN ]==--
+    imgui.GetStyle().WindowTitleAlign = imgui.ImVec2(0.5, 0.5)
+    imgui.GetStyle().ButtonTextAlign = imgui.ImVec2(0.5, 0.5)
+    imgui.GetStyle().SelectableTextAlign = imgui.ImVec2(0.5, 0.5)
+    
+    --==[ COLORS ]==--
+    imgui.GetStyle().Colors[imgui.Col.Text]                   = imgui.ImVec4(1.00, 1.00, 1.00, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TextDisabled]           = imgui.ImVec4(0.50, 0.50, 0.50, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.WindowBg]               = imgui.ImVec4(0.07, 0.07, 0.07, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ChildBg]                = imgui.ImVec4(0.07, 0.07, 0.07, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.PopupBg]                = imgui.ImVec4(0.07, 0.07, 0.07, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.Border]                 = imgui.ImVec4(0.25, 0.25, 0.26, 0.54)
+    imgui.GetStyle().Colors[imgui.Col.BorderShadow]           = imgui.ImVec4(0.00, 0.00, 0.00, 0.00)
+    imgui.GetStyle().Colors[imgui.Col.FrameBg]                = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.FrameBgHovered]         = imgui.ImVec4(0.25, 0.25, 0.26, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.FrameBgActive]          = imgui.ImVec4(0.25, 0.25, 0.26, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TitleBg]                = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TitleBgActive]          = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TitleBgCollapsed]       = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.MenuBarBg]              = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ScrollbarBg]            = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ScrollbarGrab]          = imgui.ImVec4(0.00, 0.00, 0.00, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ScrollbarGrabHovered]   = imgui.ImVec4(0.41, 0.41, 0.41, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ScrollbarGrabActive]    = imgui.ImVec4(0.51, 0.51, 0.51, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.CheckMark]              = imgui.ImVec4(1.00, 1.00, 1.00, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.SliderGrab]             = imgui.ImVec4(0.21, 0.20, 0.20, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.SliderGrabActive]       = imgui.ImVec4(0.21, 0.20, 0.20, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.Button]                 = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ButtonHovered]          = imgui.ImVec4(0.21, 0.20, 0.20, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ButtonActive]           = imgui.ImVec4(0.41, 0.41, 0.41, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.Header]                 = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.HeaderHovered]          = imgui.ImVec4(0.20, 0.20, 0.20, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.HeaderActive]           = imgui.ImVec4(0.47, 0.47, 0.47, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.Separator]              = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.SeparatorHovered]       = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.SeparatorActive]        = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.ResizeGrip]             = imgui.ImVec4(1.00, 1.00, 1.00, 0.25)
+    imgui.GetStyle().Colors[imgui.Col.ResizeGripHovered]      = imgui.ImVec4(1.00, 1.00, 1.00, 0.67)
+    imgui.GetStyle().Colors[imgui.Col.ResizeGripActive]       = imgui.ImVec4(1.00, 1.00, 1.00, 0.95)
+    imgui.GetStyle().Colors[imgui.Col.Tab]                    = imgui.ImVec4(0.12, 0.12, 0.12, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TabHovered]             = imgui.ImVec4(0.28, 0.28, 0.28, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TabActive]              = imgui.ImVec4(0.30, 0.30, 0.30, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TabUnfocused]           = imgui.ImVec4(0.07, 0.10, 0.15, 0.97)
+    imgui.GetStyle().Colors[imgui.Col.TabUnfocusedActive]     = imgui.ImVec4(0.14, 0.26, 0.42, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.PlotLines]              = imgui.ImVec4(0.61, 0.61, 0.61, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.PlotLinesHovered]       = imgui.ImVec4(1.00, 0.43, 0.35, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.PlotHistogram]          = imgui.ImVec4(0.90, 0.70, 0.00, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.PlotHistogramHovered]   = imgui.ImVec4(1.00, 0.60, 0.00, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.TextSelectedBg]         = imgui.ImVec4(1.00, 0.00, 0.00, 0.35)
+    imgui.GetStyle().Colors[imgui.Col.DragDropTarget]         = imgui.ImVec4(1.00, 1.00, 0.00, 0.90)
+    imgui.GetStyle().Colors[imgui.Col.NavHighlight]           = imgui.ImVec4(0.26, 0.59, 0.98, 1.00)
+    imgui.GetStyle().Colors[imgui.Col.NavWindowingHighlight]  = imgui.ImVec4(1.00, 1.00, 1.00, 0.70)
+    imgui.GetStyle().Colors[imgui.Col.NavWindowingDimBg]      = imgui.ImVec4(0.80, 0.80, 0.80, 0.20)
+    imgui.GetStyle().Colors[imgui.Col.ModalWindowDimBg]       = imgui.ImVec4(0.00, 0.00, 0.00, 0.70)
+end
+
+function join_argb(a, r, g, b)
+    local argb = b  -- b
+    argb = bit.bor(argb, bit.lshift(g, 8))  -- g
+    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
+    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
+    return argb
+end
+
+function onScriptTerminate(s, q)
+    if s == thisScript() then
+        if mainIni.main.autosave then
+            SaveIni()
+        end
+    end
+end
+
+function imgui.BeginCustomTitle(title, titleSizeY, var, flags)
+    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(0, 0))
+    imgui.PushStyleVarFloat(imgui.StyleVar.WindowBorderSize, 0)
+    imgui.Begin(title, var, imgui.WindowFlags.NoTitleBar + (flags or 0))
+    imgui.SetCursorPos(imgui.ImVec2(0, 0))
+    local p = imgui.GetCursorScreenPos()
+    imgui.GetWindowDrawList():AddRectFilled(p, imgui.ImVec2(p.x + imgui.GetWindowSize().x, p.y + titleSizeY), imgui.GetColorU32Vec4(imgui.GetStyle().Colors[imgui.Col.TitleBgActive]), imgui.GetStyle().WindowRounding, 1 + 2)
+    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x / 2 - imgui.CalcTextSize(title).x / 2, titleSizeY / 2 - imgui.CalcTextSize(title).y / 2))
+    imgui.Text(title)
+    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x - (titleSizeY - 10) - 5, 5))
+    imgui.PushStyleVarFloat(imgui.StyleVar.FrameRounding, imgui.GetStyle().WindowRounding)
+    if imgui.Button('X##CLOSEBUTTON.WINDOW.'..title, imgui.ImVec2(titleSizeY - 10, titleSizeY - 10)) then menu = false end
+    imgui.SetCursorPos(imgui.ImVec2(5, titleSizeY + 5))
+    imgui.PopStyleVar(3)
+    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(5, 5))
+end
