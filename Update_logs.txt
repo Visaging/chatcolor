@@ -1,3 +1,7 @@
+Version 1.82
+1. Custom frequency replacing text is now supported.
+2. Minor bug fixes.
+
 Version 1.81
 1. Toggle command has been replaced with a button in the main menu.
 2. Quality enhancement updates.
