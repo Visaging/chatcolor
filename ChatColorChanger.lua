@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.80
-local script_version_text = '1.80'
+local script_version = 1.81
+local script_version_text = '1.81'
 
 require "moonloader"
 require "sampfuncs"
@@ -135,87 +135,103 @@ imgui.OnFrame(function() return menu and not isGamePaused() end,
 function()
     width, height = getScreenResolution()
     imgui.SetNextWindowPos(imgui.ImVec2(width / 2, height / 2), imgui.Cond.Always, imgui.ImVec2(0.5, 0.5))
-    imgui.SetNextWindowSize(imgui.ImVec2(500, 345), imgui.Cond.FirstUseEver)
+    imgui.SetNextWindowSize(imgui.ImVec2(500, 400), imgui.Cond.FirstUseEver)
     imgui.BeginCustomTitle(u8"Chat Color Changer", 30, main_win, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
 
-        imgui.BeginChild("##1", imgui.ImVec2(130, 150), true)
-            if imgui.Button(u8'General Chats') then windno = 1 end
-            if imgui.Button(u8'Faction Chats') then windno = 2 end
-            if imgui.Button(u8'Family/Gang Chats') then windno = 3 end
-            if imgui.Button(u8'Staff Chats') then windno = 4 end
-            if imgui.Button(u8'Chat Toggler') then windno = 5 end
+        imgui.BeginChild("##1", imgui.ImVec2(130, 30), true)
+            if imgui.Button(mainIni.main.toggle and u8'Enabled' or not mainIni.main.toggle and u8'Disabled', imgui.ImVec2(120, 20)) then
+                mainIni.main.toggle = not mainIni.main.toggle
+            end
         imgui.EndChild()
+        if mainIni.main.toggle then
+            imgui.SetCursorPos(imgui.ImVec2(5, 70))
 
-        imgui.SetCursorPos(imgui.ImVec2(5, 190))
+            imgui.BeginChild("##2", imgui.ImVec2(130, 175), true)
+                imgui.SetCursorPos(imgui.ImVec2(48, 5))
+                imgui.Text("Chats")
+                imgui.Separator()
+                if imgui.Button(u8'General Chats') then windno = 1 end
+                if imgui.Button(u8'Faction Chats') then windno = 2 end
+                if imgui.Button(u8'Family/Gang Chats') then windno = 3 end
+                if imgui.Button(u8'Staff Chats') then windno = 4 end
+                imgui.Separator()
+                imgui.SetCursorPos(imgui.ImVec2(48, 125))
+                imgui.Text("Extras")
+                imgui.Separator()
+                if imgui.Button(u8'Chat Toggler') then windno = 5 end
+            imgui.EndChild()
 
-        imgui.BeginChild("##2", imgui.ImVec2(130, 150), true)
-            if imgui.Button(u8'Update Logs') then windno = 6 updatelogs = https.request(updatelogs_url) end
-            if imgui.Button(u8'Update Script') then update_script(true) end
-            if imgui.Button(u8'Save Config') then SaveIni() end
-            if imgui.Button(u8'Reload Script') then SaveIni() thisScript():reload() end
-            if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
-            if imgui.Checkbox("Auto Save", new.bool(mainIni.main.autosave)) then mainIni.main.autosave = not mainIni.main.autosave end
-        imgui.EndChild()
+            imgui.SetCursorPos(imgui.ImVec2(5, 250))
 
-        imgui.SetCursorPos(imgui.ImVec2(140, 35))
+            imgui.BeginChild("##3", imgui.ImVec2(130, 145), true)
+                if imgui.Button(u8'Update Logs') then windno = 6 updatelogs = https.request(updatelogs_url) end
+                if imgui.Button(u8'Update Script') then update_script(true) end
+                if imgui.Button(u8'Save Config') then SaveIni() end
+                if imgui.Button(u8'Reload Script') then SaveIni() thisScript():reload() end
+                if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
+                if imgui.Checkbox("Auto Save", new.bool(mainIni.main.autosave)) then mainIni.main.autosave = not mainIni.main.autosave end
+            imgui.EndChild()
 
-        imgui.BeginChild("##3", imgui.ImVec2(355, 305), true)
-            if windno == 1 then
-                if imgui.Checkbox("Global Chat", new.bool(mainIni.main.togccg)) then mainIni.main.togccg = not mainIni.main.togccg end
-                if mainIni.main.togccg then imgui.SameLine() imgui.ColorEdit4('##presettings.global', presettings.global, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+            imgui.SetCursorPos(imgui.ImVec2(140, 35))
 
-                if imgui.Checkbox("Donator Chat", new.bool(mainIni.main.togccdc)) then mainIni.main.togccdc = not mainIni.main.togccdc end
-                if mainIni.main.togccdc then imgui.SameLine() imgui.ColorEdit4('##presettings.dc', presettings.dc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+            imgui.BeginChild("##4", imgui.ImVec2(355, 360), true)
+                if windno == 1 then
+                    if imgui.Checkbox("Global Chat", new.bool(mainIni.main.togccg)) then mainIni.main.togccg = not mainIni.main.togccg end
+                    if mainIni.main.togccg then imgui.SameLine() imgui.ColorEdit4('##presettings.global', presettings.global, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
-                if imgui.Checkbox("Portable Radio Chat", new.bool(mainIni.main.togccpr)) then mainIni.main.togccpr = not mainIni.main.togccpr end
-                if mainIni.main.togccpr then imgui.SameLine() imgui.ColorEdit4('##presettings.pradio', presettings.pradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                    if imgui.Checkbox("Donator Chat", new.bool(mainIni.main.togccdc)) then mainIni.main.togccdc = not mainIni.main.togccdc end
+                    if mainIni.main.togccdc then imgui.SameLine() imgui.ColorEdit4('##presettings.dc', presettings.dc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
-                if imgui.Checkbox("Portable Radio Frequency Hider", new.bool(mainIni.main.freqhider)) then mainIni.main.freqhider = not mainIni.main.freqhider end
-            elseif windno == 2 then
-                if imgui.Checkbox("Faction Radio", new.bool(mainIni.main.togccr)) then mainIni.main.togccr = not mainIni.main.togccr end
-                if mainIni.main.togccr then imgui.SameLine() imgui.ColorEdit4('##presettings.facradio', presettings.facradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                    if imgui.Checkbox("Portable Radio Chat", new.bool(mainIni.main.togccpr)) then mainIni.main.togccpr = not mainIni.main.togccpr end
+                    if mainIni.main.togccpr then imgui.SameLine() imgui.ColorEdit4('##presettings.pradio', presettings.pradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
-                if imgui.Checkbox("Department Radio", new.bool(mainIni.main.togccd)) then mainIni.main.togccd = not mainIni.main.togccd end
-                if mainIni.main.togccd then if imgui.Checkbox("Comman color for all departments:", new.bool(mainIni.main.dcommons)) then mainIni.main.dcommons = not mainIni.main.dcommons end end
-                if mainIni.main.dcommons and mainIni.main.togccd then imgui.SameLine() imgui.ColorEdit4('##presettings.dcommon', presettings.dcommon, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
-                if not mainIni.main.dcommons and mainIni.main.togccd then 
-                    imgui.Text(u8"LSPD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dlspd', presettings.dlspd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
-                    imgui.Text(u8"ARES:") imgui.SameLine() imgui.ColorEdit4('##presettings.dares', presettings.dares, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
-                    imgui.Text(u8"FBI:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfbi', presettings.dfbi, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
-                    imgui.Text(u8"LSFMD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfmd', presettings.dfmd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar)
-                end
+                    if imgui.Checkbox("Portable Radio Frequency Hider", new.bool(mainIni.main.freqhider)) then mainIni.main.freqhider = not mainIni.main.freqhider end
+                elseif windno == 2 then
+                    if imgui.Checkbox("Faction Radio", new.bool(mainIni.main.togccr)) then mainIni.main.togccr = not mainIni.main.togccr end
+                    if mainIni.main.togccr then imgui.SameLine() imgui.ColorEdit4('##presettings.facradio', presettings.facradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
-                if imgui.Checkbox("News Chat", new.bool(mainIni.main.togccnews)) then mainIni.main.togccnews = not mainIni.main.togccnews end
-                if mainIni.main.togccnews then imgui.SameLine() imgui.ColorEdit4('##presettings.news', presettings.news, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
-            elseif windno == 3 then
-                if imgui.Checkbox("Family Chat", new.bool(mainIni.main.togccf)) then mainIni.main.togccf = not mainIni.main.togccf end
-                if mainIni.main.togccf then imgui.SameLine() imgui.ColorEdit4('##presettings.family', presettings.family, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
-            elseif windno == 4 then
-                if imgui.Checkbox("Community Chat", new.bool(mainIni.main.togcccom)) then mainIni.main.togcccom = not mainIni.main.togcccom end
-                if mainIni.main.togcccom then imgui.SameLine() imgui.ColorEdit4('##presettings.com', presettings.com, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                    if imgui.Checkbox("Department Radio", new.bool(mainIni.main.togccd)) then mainIni.main.togccd = not mainIni.main.togccd end
+                    if mainIni.main.togccd then if imgui.Checkbox("Comman color for all departments:", new.bool(mainIni.main.dcommons)) then mainIni.main.dcommons = not mainIni.main.dcommons end end
+                    if mainIni.main.dcommons and mainIni.main.togccd then imgui.SameLine() imgui.ColorEdit4('##presettings.dcommon', presettings.dcommon, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                    if not mainIni.main.dcommons and mainIni.main.togccd then 
+                        imgui.Text(u8"LSPD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dlspd', presettings.dlspd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                        imgui.Text(u8"ARES:") imgui.SameLine() imgui.ColorEdit4('##presettings.dares', presettings.dares, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                        imgui.Text(u8"FBI:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfbi', presettings.dfbi, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) imgui.SameLine()
+                        imgui.Text(u8"LSFMD:") imgui.SameLine() imgui.ColorEdit4('##presettings.dfmd', presettings.dfmd, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar)
+                    end
 
-                if imgui.Checkbox("Helper Chat", new.bool(mainIni.main.togcchc)) then mainIni.main.togcchc = not mainIni.main.togcchc end
-                if mainIni.main.togcchc then imgui.SameLine() imgui.ColorEdit4('##presettings.hc', presettings.hc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                    if imgui.Checkbox("News Chat", new.bool(mainIni.main.togccnews)) then mainIni.main.togccnews = not mainIni.main.togccnews end
+                    if mainIni.main.togccnews then imgui.SameLine() imgui.ColorEdit4('##presettings.news', presettings.news, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                elseif windno == 3 then
+                    if imgui.Checkbox("Family Chat", new.bool(mainIni.main.togccf)) then mainIni.main.togccf = not mainIni.main.togccf end
+                    if mainIni.main.togccf then imgui.SameLine() imgui.ColorEdit4('##presettings.family', presettings.family, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                elseif windno == 4 then
+                    if imgui.Checkbox("Community Chat", new.bool(mainIni.main.togcccom)) then mainIni.main.togcccom = not mainIni.main.togcccom end
+                    if mainIni.main.togcccom then imgui.SameLine() imgui.ColorEdit4('##presettings.com', presettings.com, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
-                if imgui.Checkbox("Newbie Chat", new.bool(mainIni.main.togccn)) then mainIni.main.togccn = not mainIni.main.togccn end
-                if mainIni.main.togccn then imgui.SameLine() imgui.ColorEdit4('##presettings.newbie', presettings.newbie, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
-            elseif windno == 5 then
-                if imgui.Checkbox("Toggle Faction Radio", new.bool(mainIni.main.togfacrad)) then mainIni.main.togfacrad = not mainIni.main.togfacrad end
-                if imgui.Checkbox("Toggle Department Radio", new.bool(mainIni.main.togddialog)) then mainIni.main.togddialog = not mainIni.main.togddialog end
-                if mainIni.main.togddialog then if imgui.Checkbox("Toggle all departments", new.bool(mainIni.main.togdall)) then mainIni.main.togdall = not mainIni.main.togdall end end
-                if not mainIni.main.togdall and mainIni.main.togddialog then
-                    if imgui.Checkbox("Toggle LSPD", new.bool(mainIni.main.togdpd)) then mainIni.main.togdpd = not mainIni.main.togdpd end
-                    if imgui.Checkbox("Toggle ARES", new.bool(mainIni.main.togdares)) then mainIni.main.togdares = not mainIni.main.togdares end
-                    if imgui.Checkbox("Toggle FBI", new.bool(mainIni.main.togdfbi)) then mainIni.main.togdfbi = not mainIni.main.togdfbi end
-                    if imgui.Checkbox("Toggle LSFMD", new.bool(mainIni.main.togdfmd)) then mainIni.main.togdfmd = not mainIni.main.togdfmd end
-                end
-            elseif windno == 6 then
-                imgui.SetCursorPos(imgui.ImVec2(75, 5))
-                imgui.Text("Update Logs - Current Version: "..script_version_text)
-                imgui.NewLine()
-                updatelogs_text = updatelogs:match(".+")
-	            if updatelogs_text ~= nil then
-                    imgui.Text(updatelogs_text)
+                    if imgui.Checkbox("Helper Chat", new.bool(mainIni.main.togcchc)) then mainIni.main.togcchc = not mainIni.main.togcchc end
+                    if mainIni.main.togcchc then imgui.SameLine() imgui.ColorEdit4('##presettings.hc', presettings.hc, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+
+                    if imgui.Checkbox("Newbie Chat", new.bool(mainIni.main.togccn)) then mainIni.main.togccn = not mainIni.main.togccn end
+                    if mainIni.main.togccn then imgui.SameLine() imgui.ColorEdit4('##presettings.newbie', presettings.newbie, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
+                elseif windno == 5 then
+                    if imgui.Checkbox("Toggle Faction Radio", new.bool(mainIni.main.togfacrad)) then mainIni.main.togfacrad = not mainIni.main.togfacrad end
+                    if imgui.Checkbox("Toggle Department Radio", new.bool(mainIni.main.togddialog)) then mainIni.main.togddialog = not mainIni.main.togddialog end
+                    if mainIni.main.togddialog then if imgui.Checkbox("Toggle all departments", new.bool(mainIni.main.togdall)) then mainIni.main.togdall = not mainIni.main.togdall end end
+                    if not mainIni.main.togdall and mainIni.main.togddialog then
+                        if imgui.Checkbox("Toggle LSPD", new.bool(mainIni.main.togdpd)) then mainIni.main.togdpd = not mainIni.main.togdpd end
+                        if imgui.Checkbox("Toggle ARES", new.bool(mainIni.main.togdares)) then mainIni.main.togdares = not mainIni.main.togdares end
+                        if imgui.Checkbox("Toggle FBI", new.bool(mainIni.main.togdfbi)) then mainIni.main.togdfbi = not mainIni.main.togdfbi end
+                        if imgui.Checkbox("Toggle LSFMD", new.bool(mainIni.main.togdfmd)) then mainIni.main.togdfmd = not mainIni.main.togdfmd end
+                    end
+                elseif windno == 6 then
+                    imgui.SetCursorPos(imgui.ImVec2(75, 5))
+                    imgui.Text("Update Logs - Current Version: "..script_version_text)
+                    imgui.NewLine()
+                    updatelogs_text = updatelogs:match(".+")
+                    if updatelogs_text ~= nil then
+                        imgui.Text(updatelogs_text)
+                    end
                 end
             end
         imgui.EndChild()
@@ -226,13 +242,7 @@ function main()
     while not isSampAvailable() do wait(1000) end
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}[/chatcolor].", -1)
     if mainIni.main.autoupdate then update_script(false) end
-    sampRegisterChatCommand("cc", cmd_toggle)
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
-    sampRegisterChatCommand("ccversion", function()
-		lua_thread.create(function()
-            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Current version: {00b7ff}[%s]{FFFFFF}. Use {00b7ff}[/ccupdate]{FFFFFF} to check for updates.", script.this.name, script_version_text), -1)
-		end)
-	end)
 end
 
 function se.onServerMessage(clr, msg)
