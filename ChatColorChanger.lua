@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.81
-local script_version_text = '1.81'
+local script_version = 1.82
+local script_version_text = '1.82'
 
 require "moonloader"
 require "sampfuncs"
@@ -39,6 +39,7 @@ if not doesFileExist(config) then
                 main = {
                     autoupdate = true,
                     autosave = true,
+                    sfh = "nil",
                     --[[ CHATS ]]
                     toggle = false,
                     togccg = false,
@@ -164,7 +165,7 @@ function()
             imgui.SetCursorPos(imgui.ImVec2(5, 250))
 
             imgui.BeginChild("##3", imgui.ImVec2(130, 145), true)
-                if imgui.Button(u8'Update Logs') then windno = 6 updatelogs = https.request(updatelogs_url) end
+                if imgui.Button(u8'Update Logs') then windno = 6 end
                 if imgui.Button(u8'Update Script') then update_script(true) end
                 if imgui.Button(u8'Save Config') then SaveIni() end
                 if imgui.Button(u8'Reload Script') then SaveIni() thisScript():reload() end
@@ -186,6 +187,8 @@ function()
                     if mainIni.main.togccpr then imgui.SameLine() imgui.ColorEdit4('##presettings.pradio', presettings.pradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
 
                     if imgui.Checkbox("Portable Radio Frequency Hider", new.bool(mainIni.main.freqhider)) then mainIni.main.freqhider = not mainIni.main.freqhider end
+                    local fhn = new.char[256](mainIni.main.sfh)
+                    if mainIni.main.freqhider then imgui.Text("Replacing text: ") imgui.SameLine() if imgui.InputText('##sfh', fhn, sizeof(fhn), imgui.InputTextFlags.EnterReturnsTrue) then mainIni.main.sfh = u8:decode(str(fhn)) end imgui.Text("* Enter 'nil' for making it empty.") end
                 elseif windno == 2 then
                     if imgui.Checkbox("Faction Radio", new.bool(mainIni.main.togccr)) then mainIni.main.togccr = not mainIni.main.togccr end
                     if mainIni.main.togccr then imgui.SameLine() imgui.ColorEdit4('##presettings.facradio', presettings.facradio, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
@@ -243,13 +246,15 @@ function main()
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}[/chatcolor].", -1)
     if mainIni.main.autoupdate then update_script(false) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
+    updatelogs = https.request(updatelogs_url)
 end
 
 function se.onServerMessage(clr, msg)
+    if mainIni.main.sfh == "nil" then fhs = "" else fhs = mainIni.main.sfh end
     if not mainIni.main.toggle or not mainIni.main.togccpr then
         if (mainIni.main.freqhider and clr == 1845194239) then
             if msg:match("**.Radio %(.+% kHz%).%**.+[a-zA-Z_]+%:") then
-                msg = msg:gsub("**.Radio %(.+% kHz%).", "", 1)
+                msg = msg:gsub("**.Radio %(.+% kHz%).", fhs.." ", 1)
                 sampAddChatMessage(msg, 7207789)
                 return false
             end
@@ -291,7 +296,7 @@ function se.onServerMessage(clr, msg)
                 if not (mainIni.main.freqhider) then
                     return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)), msg}
                 else
-                    msg = msg:gsub("**.Radio %(.+% kHz%).", "", 1)
+                    msg = msg:gsub("**.Radio %(.+% kHz%).", fhs.." "..'{'..string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)..'}', 1)
                     return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)), msg}
                 end
             end
