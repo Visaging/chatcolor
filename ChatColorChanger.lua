@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.82
-local script_version_text = '1.82'
+local script_version = 1.83
+local script_version_text = '1.83'
 
 require "moonloader"
 require "sampfuncs"
@@ -136,9 +136,8 @@ imgui.OnFrame(function() return menu and not isGamePaused() end,
 function()
     width, height = getScreenResolution()
     imgui.SetNextWindowPos(imgui.ImVec2(width / 2, height / 2), imgui.Cond.Always, imgui.ImVec2(0.5, 0.5))
-    imgui.SetNextWindowSize(imgui.ImVec2(500, 400), imgui.Cond.FirstUseEver)
+    imgui.SetNextWindowSize(imgui.ImVec2(500, 420), imgui.Cond.FirstUseEver)
     imgui.BeginCustomTitle(u8"Chat Color Changer", 30, main_win, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
-
         imgui.BeginChild("##1", imgui.ImVec2(130, 30), true)
             if imgui.Button(mainIni.main.toggle and u8'Enabled' or not mainIni.main.toggle and u8'Disabled', imgui.ImVec2(120, 20)) then
                 mainIni.main.toggle = not mainIni.main.toggle
@@ -147,35 +146,35 @@ function()
         if mainIni.main.toggle then
             imgui.SetCursorPos(imgui.ImVec2(5, 70))
 
-            imgui.BeginChild("##2", imgui.ImVec2(130, 175), true)
+            imgui.BeginChild("##2", imgui.ImVec2(130, 185), true)
                 imgui.SetCursorPos(imgui.ImVec2(48, 5))
                 imgui.Text("Chats")
                 imgui.Separator()
-                if imgui.Button(u8'General Chats') then windno = 1 end
-                if imgui.Button(u8'Faction Chats') then windno = 2 end
-                if imgui.Button(u8'Family/Gang Chats') then windno = 3 end
-                if imgui.Button(u8'Staff Chats') then windno = 4 end
+                if imgui.Button(u8'General Chats', imgui.ImVec2(120, 20)) then windno = 1 end
+                if imgui.Button(u8'Faction Chats', imgui.ImVec2(120, 20)) then windno = 2 end
+                if imgui.Button(u8'Family/Gang Chats', imgui.ImVec2(120, 20)) then windno = 3 end
+                if imgui.Button(u8'Staff Chats', imgui.ImVec2(120, 20)) then windno = 4 end
                 imgui.Separator()
-                imgui.SetCursorPos(imgui.ImVec2(48, 125))
+                imgui.SetCursorPos(imgui.ImVec2(48, 132))
                 imgui.Text("Extras")
                 imgui.Separator()
-                if imgui.Button(u8'Chat Toggler') then windno = 5 end
+                if imgui.Button(u8'Chat Toggler', imgui.ImVec2(120, 20)) then windno = 5 end
             imgui.EndChild()
 
-            imgui.SetCursorPos(imgui.ImVec2(5, 250))
+            imgui.SetCursorPos(imgui.ImVec2(5, 260))
 
-            imgui.BeginChild("##3", imgui.ImVec2(130, 145), true)
-                if imgui.Button(u8'Update Logs') then windno = 6 end
-                if imgui.Button(u8'Update Script') then update_script(true) end
-                if imgui.Button(u8'Save Config') then SaveIni() end
-                if imgui.Button(u8'Reload Script') then SaveIni() thisScript():reload() end
+            imgui.BeginChild("##3", imgui.ImVec2(130, 155), true)
+                if imgui.Button(u8'Update Logs', imgui.ImVec2(120, 20)) then windno = 6 end
+                if imgui.Button(u8'Update Script', imgui.ImVec2(120, 20)) then update_script(true) end
+                if imgui.Button(u8'Save Config', imgui.ImVec2(120, 20)) then SaveIni() sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Config Saved!", script.this.name), -1) end
+                if imgui.Button(u8'Reload Script', imgui.ImVec2(120, 20)) then SaveIni() thisScript():reload() end
                 if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
                 if imgui.Checkbox("Auto Save", new.bool(mainIni.main.autosave)) then mainIni.main.autosave = not mainIni.main.autosave end
             imgui.EndChild()
 
             imgui.SetCursorPos(imgui.ImVec2(140, 35))
 
-            imgui.BeginChild("##4", imgui.ImVec2(355, 360), true)
+            imgui.BeginChild("##4", imgui.ImVec2(355, 380), true)
                 if windno == 1 then
                     if imgui.Checkbox("Global Chat", new.bool(mainIni.main.togccg)) then mainIni.main.togccg = not mainIni.main.togccg end
                     if mainIni.main.togccg then imgui.SameLine() imgui.ColorEdit4('##presettings.global', presettings.global, imgui.ColorEditFlags.NoInputs + imgui.ColorEditFlags.AlphaBar) end
@@ -243,7 +242,7 @@ end)
 
 function main()
     while not isSampAvailable() do wait(1000) end
-    sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}has loaded. {00FF00}[/chatcolor].", -1)
+    sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}by {FFFF00}Visage. {FF0000}[/chatcolor]", -1)
     if mainIni.main.autoupdate then update_script(false) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
     updatelogs = https.request(updatelogs_url)
@@ -350,20 +349,6 @@ function se.onServerMessage(clr, msg)
     end
 end
 
-function cmd_toggle()
-	if mainIni.main.toggle then
-		mainIni.main.toggle = false
-		if inicfg.save(mainIni, directIni) then
-			sampAddChatMessage("{7700FF}Chat Color Changer{ffffff}: {ff0000}Disabled", -1)
-		end
-	else
-		mainIni.main.toggle = true
-		if inicfg.save(mainIni, directIni) then
-			sampAddChatMessage("{7700FF}Chat Color Changer{ffffff}: {00ff00}Enabled", -1)
-		end
-	end
-end
-
 function update_script(noupdatecheck)
 	local update_text = https.request(update_url)
 	if update_text ~= nil then
@@ -387,6 +372,39 @@ function update_script(noupdatecheck)
 			end
 		end
 	end
+end
+
+function join_argb(a, r, g, b)
+    local argb = b  -- b
+    argb = bit.bor(argb, bit.lshift(g, 8))  -- g
+    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
+    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
+    return argb
+end
+
+function onScriptTerminate(s, q)
+    if s == thisScript() then
+        if mainIni.main.autosave then
+            SaveIni()
+        end
+    end
+end
+
+function imgui.BeginCustomTitle(title, titleSizeY, var, flags)
+    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(0, 0))
+    imgui.PushStyleVarFloat(imgui.StyleVar.WindowBorderSize, 0)
+    imgui.Begin(title, var, imgui.WindowFlags.NoTitleBar + (flags or 0))
+    imgui.SetCursorPos(imgui.ImVec2(0, 0))
+    local p = imgui.GetCursorScreenPos()
+    imgui.GetWindowDrawList():AddRectFilled(p, imgui.ImVec2(p.x + imgui.GetWindowSize().x, p.y + titleSizeY), imgui.GetColorU32Vec4(imgui.GetStyle().Colors[imgui.Col.TitleBgActive]), imgui.GetStyle().WindowRounding, 1 + 2)
+    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x / 2 - imgui.CalcTextSize(title).x / 2, titleSizeY / 2 - imgui.CalcTextSize(title).y / 2))
+    imgui.Text(title)
+    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x - (titleSizeY - 10) - 5, 5))
+    imgui.PushStyleVarFloat(imgui.StyleVar.FrameRounding, imgui.GetStyle().WindowRounding)
+    if imgui.Button('X##CLOSEBUTTON.WINDOW.'..title, imgui.ImVec2(titleSizeY - 10, titleSizeY - 10)) then menu = false end
+    imgui.SetCursorPos(imgui.ImVec2(5, titleSizeY + 5))
+    imgui.PopStyleVar(3)
+    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(5, 5))
 end
 
 function style()
@@ -471,37 +489,4 @@ function style()
     imgui.GetStyle().Colors[imgui.Col.NavWindowingHighlight]  = imgui.ImVec4(1.00, 1.00, 1.00, 0.70)
     imgui.GetStyle().Colors[imgui.Col.NavWindowingDimBg]      = imgui.ImVec4(0.80, 0.80, 0.80, 0.20)
     imgui.GetStyle().Colors[imgui.Col.ModalWindowDimBg]       = imgui.ImVec4(0.00, 0.00, 0.00, 0.70)
-end
-
-function join_argb(a, r, g, b)
-    local argb = b  -- b
-    argb = bit.bor(argb, bit.lshift(g, 8))  -- g
-    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
-    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
-    return argb
-end
-
-function onScriptTerminate(s, q)
-    if s == thisScript() then
-        if mainIni.main.autosave then
-            SaveIni()
-        end
-    end
-end
-
-function imgui.BeginCustomTitle(title, titleSizeY, var, flags)
-    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(0, 0))
-    imgui.PushStyleVarFloat(imgui.StyleVar.WindowBorderSize, 0)
-    imgui.Begin(title, var, imgui.WindowFlags.NoTitleBar + (flags or 0))
-    imgui.SetCursorPos(imgui.ImVec2(0, 0))
-    local p = imgui.GetCursorScreenPos()
-    imgui.GetWindowDrawList():AddRectFilled(p, imgui.ImVec2(p.x + imgui.GetWindowSize().x, p.y + titleSizeY), imgui.GetColorU32Vec4(imgui.GetStyle().Colors[imgui.Col.TitleBgActive]), imgui.GetStyle().WindowRounding, 1 + 2)
-    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x / 2 - imgui.CalcTextSize(title).x / 2, titleSizeY / 2 - imgui.CalcTextSize(title).y / 2))
-    imgui.Text(title)
-    imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowSize().x - (titleSizeY - 10) - 5, 5))
-    imgui.PushStyleVarFloat(imgui.StyleVar.FrameRounding, imgui.GetStyle().WindowRounding)
-    if imgui.Button('X##CLOSEBUTTON.WINDOW.'..title, imgui.ImVec2(titleSizeY - 10, titleSizeY - 10)) then menu = false end
-    imgui.SetCursorPos(imgui.ImVec2(5, titleSizeY + 5))
-    imgui.PopStyleVar(3)
-    imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, imgui.ImVec2(5, 5))
 end
