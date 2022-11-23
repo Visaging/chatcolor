@@ -1,3 +1,6 @@
+Version 1.84
+1. Minor bug fix for news chat.
+
 Version 1.83
 1. Quality enhancement updates.
 
