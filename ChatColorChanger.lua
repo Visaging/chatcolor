@@ -337,7 +337,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == -1697828182 and mainIni.main.togccnews) then
-            if msg:match("NR .+*") or msg:match("Live News Reporter .+*") or msg:match("Live Interview Guest .+*") then
+            if msg:match("NR .+%:") or msg:match("Live News Reporter .+%:") or msg:match("Live Interview Guest .+%:") then
                 return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.news[3] * 255, presettings.news[0] * 255, presettings.news[1] * 255, presettings.news[2] * 255)), 3, 8)), msg}
             end
         end
@@ -410,7 +410,7 @@ end
 function style()
     imgui.SwitchContext()
     --==[ STYLE ]==--
-    imgui.GetStyle().WindowPadding = imgui.ImVec2(5, 5)
+    imgui.GetStyle().WindowPadding = imgui.ImVec2(8, 8)
     imgui.GetStyle().FramePadding = imgui.ImVec2(5, 2)
     imgui.GetStyle().ItemSpacing = imgui.ImVec2(5, 5)
     imgui.GetStyle().ItemInnerSpacing = imgui.ImVec2(4, 4)
