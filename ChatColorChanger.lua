@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.84
-local script_version_text = '1.84'
+local script_version = 1.85
+local script_version_text = '1.85'
 
 require "moonloader"
 require "sampfuncs"
@@ -245,6 +245,7 @@ function main()
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}by {FFFF00}Visage. {FF0000}[/chatcolor]", -1)
     if mainIni.main.autoupdate then update_script(false) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
+    sampRegisterChatCommand("ccforceupdate", fupdate)
     updatelogs = https.request(updatelogs_url)
 end
 
@@ -252,7 +253,7 @@ function se.onServerMessage(clr, msg)
     if mainIni.main.sfh == "nil" then fhs = "" else fhs = mainIni.main.sfh end
     if not mainIni.main.toggle or not mainIni.main.togccpr then
         if (mainIni.main.freqhider and clr == 1845194239) then
-            if msg:match("**.Radio %(.+% kHz%).%**.+[a-zA-Z_]+%:") then
+            if msg:match("**.Radio %(.+% kHz%).%**.+%:") then
                 msg = msg:gsub("**.Radio %(.+% kHz%).", fhs.." ", 1)
                 sampAddChatMessage(msg, 7207789)
                 return false
@@ -291,7 +292,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == 1845194239 and mainIni.main.togccpr) then
-            if msg:match("**.Radio %(.+% kHz%).%**.+[a-zA-Z_]+%:") then
+            if msg:match("**.Radio %(.+% kHz%).%**.+%:") then
                 if not (mainIni.main.freqhider) then
                     return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.pradio[3] * 255, presettings.pradio[0] * 255, presettings.pradio[1] * 255, presettings.pradio[2] * 255)), 3, 8)), msg}
                 else
@@ -322,7 +323,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == 869072810 and mainIni.main.togcccom) then
-            if msg:match("** .+Admin") or msg:match("*** .+Helper") or msg:match("*** Former Admin") or msg:match("** Helper Manager") or msg:match("** Management") or msg:match("** Asst. Management") or msg:match("** Assistant Management") then
+            if msg:match("** .+Admin%:") or msg:match("*** .+Helper%:") or msg:match("*** Former Admin%:") or msg:match("** Helper Manager%:") or msg:match("** Management%:") or msg:match("** Asst. Management%:") or msg:match("** Assistant Management%:") then
                 return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.com[3] * 255, presettings.com[0] * 255, presettings.com[1] * 255, presettings.com[2] * 255)), 3, 8)), msg}
             end
         end
@@ -372,6 +373,18 @@ function update_script(noupdatecheck)
 			end
 		end
 	end
+end
+
+function fupdate()
+    downloadUrlToFile(script_url, script_path, function(id, status)
+        if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
+            lua_thread.create(function()
+                wait(500) 
+                thisScript():reload()
+            end)
+        end
+    end)
 end
 
 function join_argb(a, r, g, b)
