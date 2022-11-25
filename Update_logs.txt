@@ -1,5 +1,9 @@
+Version 1.85
+1. Minor bug fix in community chat.
+2. Minor bug fix in frequency hider.
+
 Version 1.84
-1. Minor bug fix for news chat.
+1. Minor bug fix in news chat.
 
 Version 1.83
 1. Quality enhancement updates.
@@ -27,10 +31,10 @@ Version 1.78
 2. Minor bug fixes.
 
 Version 1.77
-1. Minor bug fix for community chat.
+1. Minor bug fix in community chat.
 
 Version 1.76
-1. Major bug fixes for community and helper chat.
+1. Major bug fixes in community and helper chat.
 
 Version 1.75
 1. One click updation has been added.
