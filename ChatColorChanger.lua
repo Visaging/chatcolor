@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.85
-local script_version_text = '1.85'
+local script_version = 1.86
+local script_version_text = '1.86'
 
 require "moonloader"
 require "sampfuncs"
@@ -165,7 +165,7 @@ function()
 
             imgui.BeginChild("##3", imgui.ImVec2(130, 155), true)
                 if imgui.Button(u8'Update Logs', imgui.ImVec2(120, 20)) then windno = 6 end
-                if imgui.Button(u8'Update Script', imgui.ImVec2(120, 20)) then update_script(true) end
+                if imgui.Button(u8'Update Script', imgui.ImVec2(120, 20)) then update_script(true, true, false, false) end
                 if imgui.Button(u8'Save Config', imgui.ImVec2(120, 20)) then SaveIni() sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Config Saved!", script.this.name), -1) end
                 if imgui.Button(u8'Reload Script', imgui.ImVec2(120, 20)) then SaveIni() thisScript():reload() end
                 if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
@@ -243,9 +243,9 @@ end)
 function main()
     while not isSampAvailable() do wait(1000) end
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}by {FFFF00}Visage. {FF0000}[/chatcolor]", -1)
-    if mainIni.main.autoupdate then update_script(false) end
+    if mainIni.main.autoupdate then update_script(true, false, false, false) else update_script(false, false, false, true) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
-    sampRegisterChatCommand("ccforceupdate", fupdate)
+    sampRegisterChatCommand("ccforceupdate", update_script(false, false, true, false))
     updatelogs = https.request(updatelogs_url)
 end
 
@@ -350,41 +350,53 @@ function se.onServerMessage(clr, msg)
     end
 end
 
-function update_script(noupdatecheck)
-	local update_text = https.request(update_url)
-	if update_text ~= nil then
-		update_version = update_text:match("version: (.+)")
-		if update_version ~= nil then
-			if tonumber(update_version) > script_version then
-				sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! The update is in progress.", script.this.name), -1)
-				downloadUrlToFile(script_url, script_path, function(id, status)
-					if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-						sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
-						lua_thread.create(function()
-							wait(500) 
-							thisScript():reload()
-						end)
-					end
-				end)
-			else
-				if noupdatecheck then
-					sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} No new version found.", script.this.name), -1)
-				end
-			end
-		end
-	end
-end
-
-function fupdate()
-    downloadUrlToFile(script_url, script_path, function(id, status)
-        if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
-            lua_thread.create(function()
-                wait(500) 
-                thisScript():reload()
-            end)
+function update_script(norupdate, noupdatecheck, forceupdate, updaterem)
+    if updaterem then
+        local update_text = https.request(update_url)
+	    if update_text ~= nil then
+		    update_version = update_text:match("version: (.+)")
+		    if update_version ~= nil then
+			    if tonumber(update_version) > script_version then
+				    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! ", script.this.name), -1)
+                end
+            end
         end
-    end)
+    end
+    if forceupdate then
+        downloadUrlToFile(script_url, script_path, function(id, status)
+            if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+                sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
+                lua_thread.create(function()
+                    wait(500) 
+                    thisScript():reload()
+                end)
+            end
+        end)
+    end
+    if norupdate then
+        local update_text = https.request(update_url)
+        if update_text ~= nil then
+            update_version = update_text:match("version: (.+)")
+            if update_version ~= nil then
+                if tonumber(update_version) > script_version then
+                    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! The update is in progress.", script.this.name), -1)
+                    downloadUrlToFile(script_url, script_path, function(id, status)
+                        if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+                            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
+                            lua_thread.create(function()
+                                wait(500) 
+                                thisScript():reload()
+                            end)
+                        end
+                    end)
+                else
+                    if noupdatecheck then
+                        sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} No new version found.", script.this.name), -1)
+                    end
+                end
+            end
+        end
+    end
 end
 
 function join_argb(a, r, g, b)
