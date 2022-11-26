@@ -1,3 +1,6 @@
+Version 1.86
+1. Quality enhancement updates.
+
 Version 1.85
 1. Minor bug fix in community chat.
 2. Minor bug fix in frequency hider.
