@@ -10,6 +10,8 @@ local inicfg = require "inicfg"
 local imgui, ffi = require 'mimgui', require 'ffi'
 local new, str, sizeof = imgui.new, ffi.string, ffi.sizeof
 local se = require "lib.samp.events"
+local faicons = require 'fa-icons'
+local fa = require 'fAwesome5'
 local https = require 'ssl.https'
 local dlstatus = require('moonloader').download_status
 local script_path = thisScript().path
@@ -357,7 +359,7 @@ function update_script(norupdate, noupdatecheck, forceupdate, updaterem)
 		    update_version = update_text:match("version: (.+)")
 		    if update_version ~= nil then
 			    if tonumber(update_version) > script_version then
-				    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! ", script.this.name), -1)
+				    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! Current Version: [{00b7ff}%s{FFFFFF}] Latest Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text, update_version), -1)
                 end
             end
         end
