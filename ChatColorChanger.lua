@@ -245,7 +245,7 @@ function main()
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}by {FFFF00}Visage. {FF0000}[/chatcolor]", -1)
     if mainIni.main.autoupdate then update_script(true, false, false, false) else update_script(false, false, false, true) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
-    sampRegisterChatCommand("ccforceupdate", update_script(false, false, true, false))
+    sampRegisterChatCommand("ccforceupdate", function() update_script(false, false, true, false) end)
     updatelogs = https.request(updatelogs_url)
 end
 
