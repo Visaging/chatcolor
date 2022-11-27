@@ -323,7 +323,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == 869072810 and mainIni.main.togcccom) then
-            if msg:match("** .+Admin%:") or msg:match("*** .+Helper%:") or msg:match("*** Former Admin%:") or msg:match("** Helper Manager%:") or msg:match("** Management%:") or msg:match("** Asst. Management%:") or msg:match("** Assistant Management%:") then
+            if msg:match("** .+Admin.+%:") or msg:match("*** .+Helper.+%:") or msg:match("*** Former Admin") or msg:match("** Helper Manager") or msg:match("** Management") or msg:match("** Asst. Management") or msg:match("** Assistant Management") then
                 return {string.format("0x%sFF", string.sub(bit.tohex(join_argb(presettings.com[3] * 255, presettings.com[0] * 255, presettings.com[1] * 255, presettings.com[2] * 255)), 3, 8)), msg}
             end
         end
