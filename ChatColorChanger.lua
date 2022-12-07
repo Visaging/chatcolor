@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.86
-local script_version_text = '1.86'
+local script_version = 1.87
+local script_version_text = '1.87'
 
 require "moonloader"
 require "sampfuncs"
@@ -81,6 +81,20 @@ if not doesFileExist(config) then
                     dc = {r = 0.55, g = 0.21, b = 1, a = 1},
             },directIni))
     inicfg.save(mainIni, directIni)
+end
+
+imgpath = getWorkingDirectory() .. "\\resource\\Chat Color Changer\\"
+imgpath2 = getWorkingDirectory() .. "\\resource\\"
+imgpath3 = imgpath .. "logo.jpg"
+
+if not doesDirectoryExist(imgpath2) then
+    createDirectory(imgpath2)
+end
+if not doesDirectoryExist(imgpath) then
+    createDirectory(imgpath)
+end
+if not doesFileExist(imgpath3) then
+    downloadUrlToFile("https://raw.githubusercontent.com/Visaging/chatcolor/main/logo.jpg", imgpath3)
 end
 
 local directIni = config
@@ -234,7 +248,13 @@ function()
                     if updatelogs_text ~= nil then
                         imgui.Text(updatelogs_text)
                     end
+                elseif windno == 0 then
+                    imgui.SetCursorPos(imgui.ImVec2(5, 40))
+                    imgui.Image(imgui.CreateTextureFromFile(getGameDirectory() .. "\\moonloader\\resource\\Chat Color Changer\\logo.jpg") , imgui.ImVec2(345, 280))
                 end
+            else
+                imgui.SetCursorPos(imgui.ImVec2(15, 75))
+                imgui.Image(imgui.CreateTextureFromFile(getGameDirectory() .. "\\moonloader\\resource\\Chat Color Changer\\logo.jpg") , imgui.ImVec2(470, 330))
             end
         imgui.EndChild()
     imgui.End()
