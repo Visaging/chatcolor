@@ -285,17 +285,17 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == -1920073729 and mainIni.main.togfacrad) then
-            if msg:match("** .**") then
+            if msg:match("** ") then
                 return false
             end
         end
         if (clr == -5963606 and mainIni.main.togccg) then
-            if msg:match("%(%( .*") then
+            if msg:match("%(%( ") then
                 return {string.format("0x%sFF", colorslid(presettings.global)), msg}
             end
         end
         if (clr == 2108620799 and mainIni.main.togccn) then
-            if msg:match("** .*") then
+            if msg:match("** ") then
                 return {string.format("0x%sFF", colorslid(presettings.newbie)), msg}
             end
         end
@@ -310,7 +310,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == -1920073729 and mainIni.main.togccr) then
-            if msg:match("** .**") then
+            if msg:match("** ") then
                 return {string.format("0x%sFF", colorslid(presettings.facradio)), msg}
             end
         end
@@ -326,7 +326,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == -2686902 and mainIni.main.dcommons and mainIni.main.togccd) then
-            if msg:match("** .**") then
+            if msg:match("** ") then
                 return {string.format("0x%sFF", colorslid(presettings.dcommon)), msg}
             end
         end
@@ -336,12 +336,12 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == 33357768 and mainIni.main.togccf) then
-            if msg:match("** .**") then
+            if msg:match("** ") then
                 return {string.format("0x%sFF", colorslid(presettings.family)), msg}
             end
         end
         if (clr == -1511456854 and mainIni.main.togcchc) then
-            if msg:match("*** .*") then
+            if msg:match("*** ") then
                 return {string.format("0x%sFF", colorslid(presettings.hc)), msg}
             end
         end
@@ -351,7 +351,7 @@ function se.onServerMessage(clr, msg)
             end
         end
         if (clr == -1210979584 and mainIni.main.togccdc) then
-            if msg:match("%(%( .*") then
+            if msg:match("%(%( ") then
                 return {string.format("0x%sFF", colorslid(presettings.dc)), msg}
             end
         end
