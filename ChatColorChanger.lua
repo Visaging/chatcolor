@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.88
-local script_version_text = '1.88'
+local script_version = 1.89
+local script_version_text = '1.89'
 
 require "moonloader"
 require "sampfuncs"
@@ -255,6 +255,14 @@ function main()
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
     sampRegisterChatCommand("ccforceupdate", function() update_script(false, false, true, false) end)
     updatelogs = https.request(updatelogs_url)
+end
+
+function se.onSendCommand(cmd)
+    if mainIni.main.toggle and mainIni.main.togddialog and mainIni.main.togdall then
+        if cmd:match("/d .+") then
+            return false
+        end
+    end
 end
 
 function se.onServerMessage(clr, msg)
