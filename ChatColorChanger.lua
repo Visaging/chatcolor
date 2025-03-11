@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.89
-local script_version_text = '1.89'
+local script_version = 1.90
+local script_version_text = '1.90'
 
 require "moonloader"
 require "sampfuncs"
@@ -128,6 +128,9 @@ local logoimg = nil
 imgui.OnInitialize(function()
 	imgui.GetIO().IniFilename = nil
     style()
+    local glyph_ranges = imgui.GetIO().Fonts:GetGlyphRangesCyrillic()
+	imgui.GetIO().Fonts:Clear()
+    imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\'.."calibrib.ttf", 13, nil, glyph_ranges)
     logoimg = imgui.CreateTextureFromFileInMemory(logo, #logo)
 end)
 
@@ -151,14 +154,16 @@ function()
             imgui.BeginChild("##2", imgui.ImVec2(130, 185), true)
                 imgui.SetCursorPos(imgui.ImVec2(48, 5))
                 imgui.Text("Chats")
+                imgui.SetCursorPos(imgui.ImVec2(48, 20))
                 imgui.Separator()
                 if imgui.Button(u8'General Chats', imgui.ImVec2(120, 20)) then windno = 1 end
                 if imgui.Button(u8'Faction Chats', imgui.ImVec2(120, 20)) then windno = 2 end
                 if imgui.Button(u8'Family/Gang Chats', imgui.ImVec2(120, 20)) then windno = 3 end
                 if imgui.Button(u8'Staff Chats', imgui.ImVec2(120, 20)) then windno = 4 end
                 imgui.Separator()
-                imgui.SetCursorPos(imgui.ImVec2(48, 132))
+                imgui.SetCursorPos(imgui.ImVec2(48, 135))
                 imgui.Text("Extras")
+                imgui.SetCursorPos(imgui.ImVec2(48, 150))
                 imgui.Separator()
                 if imgui.Button(u8'Chat Toggler', imgui.ImVec2(120, 20)) then windno = 5 end
             imgui.EndChild()
