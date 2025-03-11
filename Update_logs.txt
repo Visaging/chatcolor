@@ -1,3 +1,6 @@
+Version 1.90
+1. Fix for missing module.
+
 Version 1.89
 1. Department radio toggle fix.
 
