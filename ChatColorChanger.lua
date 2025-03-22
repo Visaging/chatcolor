@@ -375,7 +375,7 @@ function update_check()
         if update_version ~= nil then
             if tonumber(update_version) > script_version then
                 sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! Current Version: [{00b7ff}%s{FFFFFF}] Latest Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text, update_version), -1)
-                setClipboardText("https://github.com/Visaging/Cruise-Control-Remaster")
+                setClipboardText("https://github.com/Visaging/chatcolor")
                 sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Link to the updated script has been copied to your clipbaord.", script.this.name), -1)
             elseif tonumber(update_version) == script_version then
                 sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} You are on the latest version! Current Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text), -1)
