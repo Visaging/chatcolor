@@ -1,8 +1,8 @@
 script_name("Chat Color Changer")
 script_author("Visage#6468 A.K.A. Ishaan Dunne")
 
-local script_version = 1.90
-local script_version_text = '1.90'
+local script_version = 1.91
+local script_version_text = '1.91'
 
 require "moonloader"
 require "sampfuncs"
@@ -13,7 +13,6 @@ local se = require "lib.samp.events"
 local https = require 'ssl.https'
 local dlstatus = require('moonloader').download_status
 local script_path = thisScript().path
-local script_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.lua"
 local update_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/ChatColorChanger.txt"
 local updatelogs_url = "https://raw.githubusercontent.com/Visaging/chatcolor/main/Update_logs.txt"
 local encoding = require "encoding"
@@ -37,7 +36,6 @@ if not doesFileExist(config) then
     local directIni = config
     local mainIni = inicfg.load(inicfg.load({
                 main = {
-                    autoupdate = true,
                     autosave = true,
                     sfh = "nil",
                     --[[ CHATS ]]
@@ -141,7 +139,7 @@ imgui.OnFrame(function() return menu and not isGamePaused() end,
 function()
     width, height = getScreenResolution()
     imgui.SetNextWindowPos(imgui.ImVec2(width / 2, height / 2), imgui.Cond.Always, imgui.ImVec2(0.5, 0.5))
-    imgui.SetNextWindowSize(imgui.ImVec2(500, 420), imgui.Cond.FirstUseEver)
+    imgui.SetNextWindowSize(imgui.ImVec2(500, 400), imgui.Cond.FirstUseEver)
     imgui.BeginCustomTitle(u8"Chat Color Changer", 30, main_win, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
         imgui.BeginChild("##1", imgui.ImVec2(130, 30), true)
             if imgui.Button(mainIni.main.toggle and u8'Enabled' or not mainIni.main.toggle and u8'Disabled', imgui.ImVec2(120, 20)) then
@@ -170,18 +168,17 @@ function()
 
             imgui.SetCursorPos(imgui.ImVec2(5, 260))
 
-            imgui.BeginChild("##3", imgui.ImVec2(130, 155), true)
+            imgui.BeginChild("##3", imgui.ImVec2(130, 135), true)
                 if imgui.Button(u8'Update Logs', imgui.ImVec2(120, 20)) then windno = 6 end
-                if imgui.Button(u8'Update Script', imgui.ImVec2(120, 20)) then update_script(true, true, false, false) end
+                if imgui.Button(u8'Check For Updates', imgui.ImVec2(120, 20)) then update_check() end
                 if imgui.Button(u8'Save Config', imgui.ImVec2(120, 20)) then SaveIni() sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Config Saved!", script.this.name), -1) end
                 if imgui.Button(u8'Reload Script', imgui.ImVec2(120, 20)) then SaveIni() thisScript():reload() end
-                if imgui.Checkbox("Auto Update", new.bool(mainIni.main.autoupdate)) then mainIni.main.autoupdate = not mainIni.main.autoupdate end
                 if imgui.Checkbox("Auto Save", new.bool(mainIni.main.autosave)) then mainIni.main.autosave = not mainIni.main.autosave end
             imgui.EndChild()
 
             imgui.SetCursorPos(imgui.ImVec2(140, 35))
 
-            imgui.BeginChild("##4", imgui.ImVec2(355, 380), true)
+            imgui.BeginChild("##4", imgui.ImVec2(355, 360), true)
                 if windno == 1 then
                     if imgui.Checkbox("Global Chat", new.bool(mainIni.main.togccg)) then mainIni.main.togccg = not mainIni.main.togccg end
                     if mainIni.main.togccg then imgui.SameLine() imgui.ColorEdit4('##presettings.global', presettings.global, imgui.ColorEditFlags.NoInputs) end
@@ -247,7 +244,7 @@ function()
                 end
             else
                 imgui.SetCursorPos(imgui.ImVec2(15, 75))
-                imgui.Image(logoimg, imgui.ImVec2(470, 330))
+                imgui.Image(logoimg, imgui.ImVec2(470, 310))
             end
         imgui.EndChild()
     imgui.End()
@@ -256,15 +253,15 @@ end)
 function main()
     while not isSampAvailable() do wait(1000) end
     sampAddChatMessage("{DFBD68}Chat Color Changer {FFFFFF}by {FFFF00}Visage. {FF0000}[/chatcolor]", -1)
-    if mainIni.main.autoupdate then update_script(true, false, false, false) else update_script(false, false, false, true) end
     sampRegisterChatCommand("chatcolor", function() menu = not menu windno = 0 end)
-    sampRegisterChatCommand("ccforceupdate", function() update_script(false, false, true, false) end)
     updatelogs = https.request(updatelogs_url)
 end
 
-function se.onSendCommand(cmd)
+function se.onSendCommand(input)
     if mainIni.main.toggle and mainIni.main.togddialog and mainIni.main.togdall then
-        if cmd:match("/d .+") then
+        local cmd = split(input, " ")
+        if cmd[1] == "/d" then
+            sampAddChatMessage("{b30412}Department radio is currently disabled.", -1)
             return false
         end
     end
@@ -371,50 +368,17 @@ function se.onServerMessage(clr, msg)
     end
 end
 
-function update_script(norupdate, noupdatecheck, forceupdate, updaterem)
-    if updaterem then
-        local update_text = https.request(update_url)
-	    if update_text ~= nil then
-		    update_version = update_text:match("version: (.+)")
-		    if update_version ~= nil then
-			    if tonumber(update_version) > script_version then
-				    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! Current Version: [{00b7ff}%s{FFFFFF}] Latest Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text, update_version), -1)
-                end
-            end
-        end
-    end
-    if forceupdate then
-        downloadUrlToFile(script_url, script_path, function(id, status)
-            if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-                sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
-                lua_thread.create(function()
-                    wait(500) 
-                    thisScript():reload()
-                end)
-            end
-        end)
-    end
-    if norupdate then
-        local update_text = https.request(update_url)
-        if update_text ~= nil then
-            update_version = update_text:match("version: (.+)")
-            if update_version ~= nil then
-                if tonumber(update_version) > script_version then
-                    sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! The update is in progress.", script.this.name), -1)
-                    downloadUrlToFile(script_url, script_path, function(id, status)
-                        if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-                            sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} The update was successful!", script.this.name), -1)
-                            lua_thread.create(function()
-                                wait(500) 
-                                thisScript():reload()
-                            end)
-                        end
-                    end)
-                else
-                    if noupdatecheck then
-                        sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} No new version found.", script.this.name), -1)
-                    end
-                end
+function update_check()
+    local update_text = https.request(update_url)
+    if update_text ~= nil then
+        update_version = update_text:match("version: (.+)")
+        if update_version ~= nil then
+            if tonumber(update_version) > script_version then
+                sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} New version found! Current Version: [{00b7ff}%s{FFFFFF}] Latest Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text, update_version), -1)
+                setClipboardText("https://github.com/Visaging/Cruise-Control-Remaster")
+                sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} Link to the updated script has been copied to your clipbaord.", script.this.name), -1)
+            elseif tonumber(update_version) == script_version then
+                sampAddChatMessage(string.format("{DFBD68}[%s]{FFFFFF} You are on the latest version! Current Version: [{00b7ff}%s{FFFFFF}]", script.this.name, script_version_text), -1)
             end
         end
     end
@@ -431,6 +395,15 @@ end
 function colorslid(colorvar)
     scolor = string.sub(bit.tohex(join_argb(colorvar[3] * 255, colorvar[0] * 255, colorvar[1] * 255, colorvar[2] * 255)), 3, 8)
     return scolor
+end
+
+function split(str, delim)
+	local input = ("([^%s]+)"):format(delim)
+	local output = {}
+	for k in str:gmatch(input) do
+	   table.insert(output, k) 
+	end
+	return output
 end
 
 function onScriptTerminate(s, q)
