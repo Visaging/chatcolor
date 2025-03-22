@@ -1,6 +1,7 @@
 Version 1.91
 1. Auto Update has been removed to comply with
     community rules.
+2. A simple checker for script version has been added.
 
 Version 1.90
 1. Fix for missing module.
@@ -41,7 +42,7 @@ Version 1.81
 Version 1.80
 1. Minor bug fixes.
 
-Version 1.79 - Huge Update!
+Version 1.79 [Major Update]
 1. The entire script has been re-written and revised.
 2. The entire script has been upgraded to imgui format.
 3. Custom and alpha colors are now supported.
